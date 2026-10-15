@@ -1,63 +1,81 @@
-# SIGA Fiscal — Automação de Consultas Fiscais SEFAZ-CE
+# Consultas Fiscais SIGA SEFAZ-CE
 
-Sistema modular em Python para automação de consultas fiscais de **NF-e (Nota Fiscal Eletrônica)** e **NFC-e (Nota Fiscal de Consumidor Eletrônica)** no portal **SIGA (Sistema de Interface Guiada à Autorregularização)** da SEFAZ-CE.
-
-O sistema utiliza o certificado digital A1 instalado no sistema operacional através de autenticação normal autorizada pelo usuário, realiza downloads assíncronos das planilhas XLSX oficiais, processa e valida as informações e consolida relatórios gerenciais em formatos Excel e PDF.
+Sistema automatizado de alta confiabilidade em Python para consultas e consolidação fiscal de **NF-e (Nota Fiscal Eletrônica - Modelo 55)** e **NFC-e (Nota Fiscal de Consumidor Eletrônica - Modelo 65)** no portal **SIGA (Sistema de Interface Guiada à Autorregularização)** da SEFAZ-CE.
 
 ---
 
-## Principais Funcionalidades
+## 🔒 Diretriz de Segurança e Certificados Digitais
 
-- **Gestão de Empresas:** Cadastro com validação estrita de dígitos verificadores de CNPJ, identificação automática de CNPJ Base, registro de CGF (SEFAZ-CE), ativação/desativação e busca avançada.
-- **Sessões Isoladas por Empresa:** O processamento em lote é sequencial. Cada empresa inicia e encerra sua própria instância de navegador, impedindo vazamento de cookies ou contaminações de contexto.
-- **Autenticação Segura com Certificado A1:** O sistema aguarda a seleção manual do certificado digital no navegador. Nenhuma senha, token ou chave privada é capturada ou gravada.
-- **Tratamento Independente de Documentos:**
-  - **NF-e (Modelo 55):** Entradas (Destinatário) e Saídas (Emissor).
-  - **NFC-e (Modelo 65):** Entradas e Saídas com cliente desacoplado.
-- **Regra Fundamental de Movimentação:** Totaliza exclusivamente documentos **autorizados**. Notas canceladas e denegadas são segregadas para fins de auditoria, garantindo precisão fiscal.
-- **Relatórios Gerenciais:** Subtotais analíticos mensais separados para NF-e e NFC-e, seguidos do resumo consolidado total.
-- **Interface Web Local Não-Bloqueante:** Painel desenvolvido em FastAPI + TailwindCSS para monitoramento em tempo real.
-- **Rastreabilidade e Logs Sanitizados:** Mascaramento estrito de parâmetros de URLs pré-assinadas Amazon S3 (`X-Amz-*`) e tokens.
+> [!IMPORTANT]
+> **POLÍTICA DE PRIVACIDADE E CERTIFICADOS LOCAIS:**
+> - **NENHUM certificado digital, arquivo `.pfx`, `.p12`, chave privada ou senha é versionado neste repositório.**
+> - O arquivo `.gitignore` bloqueia estritamente quaisquer chaves, certificados, credenciais locais (`.env`) e dados de bancos locais.
+> - **Cada usuário/máquina que baixar ou clonar o projeto deve configurar seus próprios certificados digital A1 localmente** (instalado no repositório de certificados do Windows ou cadastrado via interface local em ambiente seguro).
 
 ---
 
-## Estrutura da Documentação
+## 🚀 Principais Funcionalidades
 
-A documentação completa do projeto está organizada na pasta [`docs/`](docs/):
-
-- [`SETUP.md`](docs/SETUP.md): Guia passo a passo para instalação em qualquer máquina nova.
-- [`ARCHITECTURE.md`](docs/ARCHITECTURE.md): Arquitetura modular, camadas e fluxo de dados.
-- [`SIGA_INTEGRATION.md`](docs/SIGA_INTEGRATION.md): Especificação dos endpoints da SEFAZ-CE, polling e fluxo S3.
-- [`DATABASE.md`](docs/DATABASE.md): Esquema relacional do SQLite e dicionário de dados.
-- [`REPORTS.md`](docs/REPORTS.md): Fórmulas de cálculo, tratamento de canceladas/denegadas e layout dos relatórios.
-- [`TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md): Diagnóstico e resolução de incidentes.
-- [`CHANGELOG.md`](docs/CHANGELOG.md): Histórico de versões e roadmap das fases.
+- **Automação Visual Resiliente:** Execução do fluxo de consulta diretamente na interface do portal SIGA (`Informações Fiscais` -> Seleção de Ano -> Alternância `Emissor`/`Destinatário` -> Solicitação e Download via `Downloads Assíncronos`).
+- **Relatório Executivo Consolidado:** Layout executivo no padrão solicitado:
+  `EMPRESAS | VALOR ENTRADAS | VALOR SAIDAS`
+  com filtro estrito para o mês/competência escolhido.
+- **Suporte Multi-Empresa em Lote:** Processamento sequencial com sessões isoladas para cada empresa no navegador.
+- **Segregação de Auditoria Fiscal:** Contabiliza exclusivamente documentos fiscais **autorizados**, segregando canceladas e denegadas para fins de conferência e auditoria.
+- **Interface Web em Tempo Real:** Painel web moderno construído com FastAPI e TailwindCSS, com acompanhamento de progresso via Server-Sent Events (SSE) e exportação em Excel e PDF.
 
 ---
 
-## Início Rápido
+## 🛠️ Instalação e Execução em uma Nova Máquina
 
-### Requisitos:
-- Windows 10/11
-- Python 3.11 ou superior
-- Certificado digital A1 instalado no repositório de certificados do Windows
+### Pré-requisitos
+- **Windows 10 ou 11**
+- **Python 3.11 ou superior**
+- **Certificado Digital A1** válido instalado no Windows ou arquivo `.pfx` para importação local.
 
-### Execução em 2 Passos:
-1. Execute `install.bat` (ou `pip install -r requirements.txt && python -m playwright install chromium`).
-2. Execute `run.bat` (ou `python main.py`).
-3. Acesse a interface web em [http://127.0.0.1:8000](http://127.0.0.1:8000).
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/matiehusdev/consultas_fiscais_siga_ce.git
+cd consultas_fiscais_siga_ce
+```
+
+### 2. Configurar o ambiente local
+Copie o arquivo de exemplo de ambiente:
+```bash
+copy .env.example .env
+```
+
+### 3. Instalar dependências e navegadores
+Execute o script automatizado:
+```cmd
+install.bat
+```
+*(Ou manualmente: `pip install -r requirements.txt && python -m playwright install chromium`)*
+
+### 4. Iniciar a aplicação
+```cmd
+run.bat
+```
+*(Ou manualmente: `python main.py`)*
+
+Acesse no navegador: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
 ---
 
-## Status do Projeto (Fases de Desenvolvimento)
+## 🧪 Testes Automatizados
 
-- [x] **FASE 1 — Estrutura:** Base do projeto, banco de dados SQLite, validação de CNPJ, interface web responsiva, CRUD de empresas e documentação técnica.
-- [x] **FASE 2 — Navegador e Autenticação:** Instanciação Playwright com detecção de login e certificado A1 manual.
-- [ ] **FASE 3 — Seleção do Contribuinte:** Seleção precisa da unidade cadastrada via CNPJ.
-- [ ] **FASE 4 — NF-e:** Emissão de solicitação POST, polling e download de NF-e.
-- [ ] **FASE 5 — NFC-e:** Descoberta com Network Sniffer e cliente autônomo.
-- [ ] **FASE 6 — Processamento:** Processadores independentes e normalização de dados.
-- [ ] **FASE 7 — Relatórios:** Geração dos arquivos Excel e PDF consolidados.
-- [ ] **FASE 8 — Múltiplas Empresas:** Orquestrador sequencial com tolerância a falhas.
-- [ ] **FASE 9 — Histórico:** Visualização de detalhes e reprocessamento de erros.
-- [ ] **FASE 10 — Robustez:** Testes de ponta a ponta e auditoria de segurança.
+O projeto conta com suite completa de testes automatizados unitários e de integração:
+```bash
+pytest
+```
+
+---
+
+## 📚 Documentação Técnica
+
+- [`docs/SETUP.md`](docs/SETUP.md): Guia detalhado de configuração e primeiros passos.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): Arquitetura das camadas (Siga, Processor, Orchestrator, Web, Reports).
+- [`docs/SIGA_INTEGRATION.md`](docs/SIGA_INTEGRATION.md): Fluxos de navegação e integração com o portal SIGA.
+- [`docs/DATABASE.md`](docs/DATABASE.md): Estrutura do banco de dados SQLite local.
+- [`docs/REPORTS.md`](docs/REPORTS.md): Regras de cálculo e layouts dos relatórios.
+- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md): Guia de resolução de problemas e mensagens da SEFAZ.

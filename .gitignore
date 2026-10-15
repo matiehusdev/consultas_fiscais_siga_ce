@@ -25,7 +25,7 @@ data/*
 !data/db/.gitkeep
 !data/empresas/.gitkeep
 
-# Chaves criptográficas e certificados digitais
+# Proteção estrita: Certificados digitais e chaves NUNCA sobem para o GitHub
 *.secret_key
 *.pfx
 *.p12
@@ -33,9 +33,22 @@ data/*
 *.key
 *.cer
 *.crt
+*.jks
+*.p7b
+*.p7c
+data/certificados/*
+!data/certificados/.gitkeep
+
+# Bancos de dados locais
 *.db
 *.sqlite
 *.sqlite3
+data/db/*
+!data/db/.gitkeep
+
+# Relatórios baixados e gerados de clientes
+data/consultas/*
+!data/consultas/.gitkeep
 
 # Scripts de teste e rascunho temporários
 scratch/
