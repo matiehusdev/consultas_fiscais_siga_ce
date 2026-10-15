@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest & Cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Variáveis de ambiente sensíveis
+.env
+
+# Dados dinâmicos, bancos de dados e arquivos confidenciais de clientes
+data/*
+!data/.gitkeep
+!data/certificados/.gitkeep
+!data/consultas/.gitkeep
+!data/db/.gitkeep
+!data/empresas/.gitkeep
+
+# Chaves criptográficas e certificados digitais
+*.secret_key
+*.pfx
+*.p12
+*.pem
+*.key
+*.cer
+*.crt
+*.db
+*.sqlite
+*.sqlite3
+
+# Scripts de teste e rascunho temporários
+scratch/
+
+# Logs do sistema
+*.log
+logs/
+
+# Arquivos de sistema e editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
