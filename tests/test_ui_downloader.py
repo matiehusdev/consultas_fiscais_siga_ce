@@ -59,6 +59,7 @@ def test_ui_downloader_successful_flow(tmp_path):
     mock_download_btn = MagicMock()
     mock_download_btn.is_visible.return_value = True
     mock_row.locator.return_value.first = mock_download_btn
+    mock_row.locator.return_value.last = mock_download_btn
 
     # Mock do retorno do locator da página
     def locator_side_effect(selector, *args, **kwargs):

@@ -62,7 +62,7 @@ class SigaUiDownloader:
                 time.sleep(2.0)
 
             # Fecha eventuais modais ou diálogos
-            for m_sel in ["ed-dialog button:has-text('Ok')", ".p-dialog-header-close", "button:has-text('Fechar')"]:
+            for m_sel in ["ed-dialog button:has-text('Ok')", ".p-dialog-header-close", "button:has-text('Fechar')", "button:has-text('✕')"]:
                 try:
                     b = page.locator(m_sel).first
                     if b.is_visible(timeout=400):
@@ -73,15 +73,19 @@ class SigaUiDownloader:
 
             # Se for NFCE, garante que a aba NFC-e está selecionada
             if doc_upper == "NFCE":
-                tab_nfce = page.locator("a:has-text('NFC-e'), button:has-text('NFC-e'), [role='tab']:has-text('NFC-e')").first
+                tab_nfce = page.locator("a:has-text('NFC-e'), button:has-text('NFC-e'), [role='tab']:has-text('NFC-e'), .p-menuitem-link:has-text('NFC-e')").first
                 if tab_nfce.is_visible(timeout=3000):
-                    tab_nfce.click()
-                    time.sleep(1.0)
+                    tab_class = tab_nfce.get_attribute("class") or ""
+                    if "p-highlight" not in tab_class and "active" not in tab_class:
+                        tab_nfce.click()
+                        time.sleep(1.5)
             else:
-                tab_nfe = page.locator("a:has-text('NF-e'), button:has-text('NF-e'), [role='tab']:has-text('NF-e')").first
+                tab_nfe = page.locator("a:has-text('NF-e'), button:has-text('NF-e'), [role='tab']:has-text('NF-e'), .p-menuitem-link:has-text('NF-e')").first
                 if tab_nfe.is_visible(timeout=2000):
-                    tab_nfe.click()
-                    time.sleep(0.5)
+                    tab_class = tab_nfe.get_attribute("class") or ""
+                    if "p-highlight" not in tab_class and "active" not in tab_class:
+                        tab_nfe.click()
+                        time.sleep(0.5)
 
         except Exception as e:
             err = f"Falha ao carregar página de Informações Fiscais: {sanitize_text(str(e))}"
@@ -116,13 +120,21 @@ class SigaUiDownloader:
         logger.info(f"UI Downloader: Selecionando visão '{btn_label}'...")
 
         try:
-            btn_op = page.locator(f"button:has-text('{btn_label}'), .p-button:has-text('{btn_label}'), [role='button']:has-text('{btn_label}')").first
-            if not btn_op.is_visible(timeout=2000) and btn_label == "Destinatário":
-                btn_op = page.locator("button:has-text('Destinatario'), .p-button:has-text('Destinatario')").first
+            if op_upper == "SAIDA":
+                btn_op = page.locator(".p-button:has-text('Emissor'), span.p-button-label:has-text('Emissor')").first
+            else:
+                btn_op = page.locator(".p-button:has-text('Destinatário'), .p-button:has-text('Destinatario'), span.p-button-label:has-text('Destinatário'), span.p-button-label:has-text('Destinatario')").first
 
-            if btn_op.is_visible(timeout=3000):
-                btn_op.click()
-                time.sleep(1.5)
+            try:
+                btn_op.wait_for(state="visible", timeout=10000)
+            except Exception:
+                pass
+
+            if btn_op.is_visible(timeout=2000):
+                btn_class = btn_op.get_attribute("class") or ""
+                if "p-highlight" not in btn_class:
+                    btn_op.click()
+                    time.sleep(1.5)
             else:
                 logger.warning(f"Botão de visão '{btn_label}' não encontrado diretamente. Prosseguindo...")
         except Exception as e:
@@ -133,12 +145,17 @@ class SigaUiDownloader:
         # =========================================================================
         logger.info(f"UI Downloader: Clicando em 'Baixar Tabela (XLSX)' para {doc_upper} {op_upper}...")
         try:
-            btn_baixar = page.locator("button:has-text('Baixar Tabela (XLSX)'), button:has-text('Baixar Tabela')").first
-            if not btn_baixar.is_visible(timeout=5000):
+            btn_baixar = page.locator("button:has-text('Baixar Tabela (XLSX)'), button:has-text('Baixar Tabela'), button.p-splitbutton-defaultbutton, .p-splitbutton-defaultbutton").first
+            try:
+                btn_baixar.wait_for(state="visible", timeout=15000)
+            except Exception:
+                pass
+
+            if not btn_baixar.is_visible(timeout=4000):
                 return False, "", 0, "Botão 'Baixar Tabela (XLSX)' não encontrado na tela."
 
             btn_baixar.click()
-            time.sleep(1.2)
+            time.sleep(1.5)
         except Exception as e:
             err = f"Falha ao clicar no botão 'Baixar Tabela (XLSX)': {sanitize_text(str(e))}"
             logger.error(err)
@@ -171,6 +188,12 @@ class SigaUiDownloader:
 
         visao_esperada = "EMISSOR" if op_upper == "SAIDA" else "DESTINAT"
         concluido = False
+
+        # Aguarda a primeira linha aparecer na tabela
+        try:
+            page.locator("table tbody tr").first.wait_for(state="visible", timeout=15000)
+        except Exception:
+            pass
 
         for attempt in range(1, self.max_attempts + 1):
             try:
@@ -208,10 +231,15 @@ class SigaUiDownloader:
         logger.info("UI Downloader: Solicitação pronta! Iniciando download do XLSX...")
         try:
             row1 = page.locator("table tbody tr").first
-            download_elem = row1.locator("a:has-text('Download'), button:has-text('Download')").first
+            # No DOM real da SEFAZ, o botão de download é um <span class="ng-star-inserted">Download</span> dentro de um <td>
+            dl_candidates = row1.locator("span:has-text('Download'), td:has-text('Download'), a:has-text('Download'), button:has-text('Download')")
+            download_elem = dl_candidates.last
 
             if not download_elem.is_visible(timeout=4000):
-                return False, "", 0, "Link 'Download' não encontrado na primeira linha da tabela."
+                download_elem = dl_candidates.first
+
+            if not download_elem.is_visible(timeout=4000):
+                return False, "", 0, "Elemento 'Download' não encontrado na primeira linha da tabela."
 
             with page.expect_download(timeout=30000) as download_info:
                 download_elem.click()

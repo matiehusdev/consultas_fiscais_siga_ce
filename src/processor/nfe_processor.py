@@ -37,6 +37,28 @@ def _parse_int(val) -> int:
     except Exception:
         return 0
 
+def _load_dataframe_safely(caminho_xlsx: Path) -> pd.DataFrame:
+    try:
+        return pd.read_excel(caminho_xlsx, sheet_name=0)
+    except Exception:
+        pass
+
+    for sep in [None, ",", ";", "\t"]:
+        try:
+            if sep is None:
+                df = pd.read_csv(caminho_xlsx, sep=None, engine="python", encoding="utf-8-sig")
+            else:
+                df = pd.read_csv(caminho_xlsx, sep=sep, encoding="utf-8-sig")
+            if df is not None and len(df.columns) > 1:
+                return df
+        except Exception:
+            continue
+
+    try:
+        return pd.read_csv(caminho_xlsx, sep=",", encoding="utf-8-sig")
+    except Exception:
+        return pd.DataFrame()
+
 class NFeProcessor:
     """
     Processador de planilhas XLSX oficiais de NF-e (Modelo 55) do SIGA SEFAZ-CE.
@@ -59,13 +81,7 @@ class NFeProcessor:
         records: List[NormalizedRecord] = []
 
         try:
-            try:
-                df = pd.read_excel(caminho_xlsx, sheet_name=0)
-            except Exception:
-                try:
-                    df = pd.read_csv(caminho_xlsx, sep=";", encoding="utf-8-sig")
-                except Exception:
-                    df = pd.read_csv(caminho_xlsx, sep=",", encoding="utf-8-sig")
+            df = _load_dataframe_safely(caminho_xlsx)
 
             if df.empty:
                 logger.warning(f"Planilha {caminho_xlsx.name} está vazia.")

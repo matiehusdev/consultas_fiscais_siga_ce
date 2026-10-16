@@ -126,8 +126,9 @@ class NFCeClient:
                                 matched_item = it
                                 break
 
-                    # Prioridade 2: se não encontrou com datReferencia exata, seleciona a mais recente para o CNPJ
+                    # Prioridade 2: se não encontrou com datReferencia exata, seleciona a mais recente para o CNPJ DESDE QUE seja do mesmo ano
                     if not matched_item:
+                        target_year = str(data_inicio.split("/")[-1]) if "/" in data_inicio else str(data_inicio[:4])
                         for it in items:
                             if clean_cnpj(it.get("cnpj", "")) != clean:
                                 continue
@@ -137,6 +138,10 @@ class NFCeClient:
                             filtro = it.get("filtro") or {}
                             if filtro.get("tipoOperacao") and filtro.get("tipoOperacao") != operacao_upper:
                                 continue
+                            dat_ref = filtro.get("datReferencia")
+                            if dat_ref and isinstance(dat_ref, list):
+                                if not any(target_year in str(d) for d in dat_ref):
+                                    continue
 
                             matched_item = it
                             break

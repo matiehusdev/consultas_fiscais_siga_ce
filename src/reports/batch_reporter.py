@@ -32,6 +32,16 @@ class EmpresaResumoLote:
     nfe_entradas_qtd: int
     total_canceladas_val: Decimal
     status: str
+    nfce_entradas_val: Decimal = Decimal("0.00")
+    nfce_entradas_qtd: int = 0
+    total_entradas_val: Decimal = Decimal("0.00")
+    total_entradas_qtd: int = 0
+
+    def __post_init__(self):
+        if self.total_entradas_val == Decimal("0.00") and (self.nfe_entradas_val > Decimal("0.00") or self.nfce_entradas_val > Decimal("0.00")):
+            self.total_entradas_val = self.nfe_entradas_val + self.nfce_entradas_val
+        if self.total_entradas_qtd == 0 and (self.nfe_entradas_qtd > 0 or self.nfce_entradas_qtd > 0):
+            self.total_entradas_qtd = self.nfe_entradas_qtd + self.nfce_entradas_qtd
 
 def _format_moeda(val: Decimal) -> str:
     s = f"{val:,.2f}"
@@ -102,7 +112,7 @@ class BatchReporter:
             for emp in empresas:
                 row_f += 1
                 tot_sai += emp.total_saidas_val
-                tot_ent += emp.nfe_entradas_val
+                tot_ent += emp.total_entradas_val
                 tot_canc += emp.total_canceladas_val
                 tot_nfe_s += emp.nfe_saidas_val
                 tot_nfce_s += emp.nfce_saidas_val
@@ -112,7 +122,7 @@ class BatchReporter:
                 c1.alignment = Alignment(horizontal="left", vertical="center")
                 c1.border = cls.THIN_BORDER
 
-                c2 = ws_final.cell(row=row_f, column=2, value=float(emp.nfe_entradas_val))
+                c2 = ws_final.cell(row=row_f, column=2, value=float(emp.total_entradas_val))
                 c2.number_format = '[$R$ -416]#,##0.00'
                 c2.font = Font(name="Calibri", size=11, color="B45309")
                 c2.alignment = Alignment(horizontal="right", vertical="center")
@@ -332,13 +342,13 @@ class BatchReporter:
 
             for idx, emp in enumerate(empresas, start=1):
                 tot_sai += emp.total_saidas_val
-                tot_ent += emp.nfe_entradas_val
+                tot_ent += emp.total_entradas_val
                 tot_canc += emp.total_canceladas_val
 
                 table_data.append([
                     Paragraph(str(idx), cell_center),
                     Paragraph(f"<b>{emp.razao_social}</b><br/><font color='#64748B' size='7'>CNPJ: {format_cnpj(emp.cnpj)}</font>", cell_norm),
-                    Paragraph(f"<font color='#B45309'><b>{_format_moeda(emp.nfe_entradas_val)}</b></font>", cell_right),
+                    Paragraph(f"<font color='#B45309'><b>{_format_moeda(emp.total_entradas_val)}</b></font>", cell_right),
                     Paragraph(f"<font color='#047857'><b>{_format_moeda(emp.total_saidas_val)}</b></font>", cell_right)
                 ])
 

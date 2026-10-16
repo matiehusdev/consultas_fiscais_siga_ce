@@ -404,6 +404,8 @@ def _gerar_relatorios_consolidados_lote(consulta_id: int):
                 nfce_s_qtd = 0
                 nfe_e_val = Decimal("0.00")
                 nfe_e_qtd = 0
+                nfce_e_val = Decimal("0.00")
+                nfce_e_qtd = 0
                 canc_val = Decimal("0.00")
 
                 for r in item.resultados:
@@ -422,11 +424,16 @@ def _gerar_relatorios_consolidados_lote(consulta_id: int):
                         if r.operacao == "SAIDA":
                             nfce_s_val += val_aut
                             nfce_s_qtd += qtd_aut
+                        else:
+                            nfce_e_val += val_aut
+                            nfce_e_qtd += qtd_aut
 
                     canc_val += val_canc
 
                 tot_s_val = nfe_s_val + nfce_s_val
                 tot_s_qtd = nfe_s_qtd + nfce_s_qtd
+                tot_e_val = nfe_e_val + nfce_e_val
+                tot_e_qtd = nfe_e_qtd + nfce_e_qtd
 
                 status_label = "Concluído" if item.status == "CONCLUIDO" else ("Erro" if item.status == "ERRO" else item.status)
 
@@ -442,7 +449,11 @@ def _gerar_relatorios_consolidados_lote(consulta_id: int):
                     nfe_entradas_val=nfe_e_val,
                     nfe_entradas_qtd=nfe_e_qtd,
                     total_canceladas_val=canc_val,
-                    status=status_label
+                    status=status_label,
+                    nfce_entradas_val=nfce_e_val,
+                    nfce_entradas_qtd=nfce_e_qtd,
+                    total_entradas_val=tot_e_val,
+                    total_entradas_qtd=tot_e_qtd
                 ))
 
             lote_dir = settings.consultas_dir / consulta.id_lote

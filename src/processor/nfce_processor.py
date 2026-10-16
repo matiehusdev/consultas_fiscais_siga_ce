@@ -4,7 +4,7 @@ from typing import List, Optional
 import pandas as pd
 
 from src.processor import DocumentType, OperationType, NormalizedRecord
-from src.processor.nfe_processor import _parse_decimal, _parse_int
+from src.processor.nfe_processor import _parse_decimal, _parse_int, _load_dataframe_safely
 from src.utils.logger import logger
 
 class NFCeProcessor:
@@ -29,13 +29,7 @@ class NFCeProcessor:
         records: List[NormalizedRecord] = []
 
         try:
-            try:
-                df = pd.read_excel(caminho_xlsx, sheet_name=0)
-            except Exception:
-                try:
-                    df = pd.read_csv(caminho_xlsx, sep=";", encoding="utf-8-sig")
-                except Exception:
-                    df = pd.read_csv(caminho_xlsx, sep=",", encoding="utf-8-sig")
+            df = _load_dataframe_safely(caminho_xlsx)
 
             if df.empty:
                 logger.warning(f"Planilha de NFC-e {caminho_xlsx.name} está vazia.")
@@ -48,7 +42,7 @@ class NFCeProcessor:
                 # Competência / Mês
                 mes_val = None
                 for orig_col, norm_col in col_map.items():
-                    if any(k in norm_col for k in ["data de emissão", "data emissão", "emissão", "mês", "mes", "competência", "periodo"]):
+                    if any(k in norm_col for k in ["data de emissão", "data de emissao", "data emissão", "data emissao", "emissão", "emissao", "mês", "mes", "competência", "competencia", "periodo", "período"]):
                         val_str = str(row[orig_col]).strip()
                         if val_str and val_str.lower() not in ("nan", "none", ""):
                             # Se for data completa YYYY-MM-DD ou DD/MM/YYYY, extrai ano-mês
@@ -86,7 +80,7 @@ class NFCeProcessor:
                     # Em listagem analítica nota a nota, a linha é 1 nota autorizada
                     qtd_aut = 1
                     for orig_col, norm_col in col_map.items():
-                        if "valor r$" in norm_col or (norm_col == "valor" and "icms" not in norm_col):
+                        if norm_col == "valor r$" or (norm_col.startswith("valor") and "icms" not in norm_col and "base" not in norm_col):
                             val_aut = _parse_decimal(row[orig_col])
                             break
                 else:

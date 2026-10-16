@@ -170,3 +170,42 @@ def test_excel_and_pdf_generation(tmp_path):
     assert ok_pdf is True
     assert pdf_file.exists()
     assert pdf_file.stat().st_size > 1000
+
+def test_nfce_processor_reads_csv_comma_delimited(tmp_path):
+    csv_as_xlsx = tmp_path / "nfce_entrada.xlsx"
+    csv_content = (
+        '"CNPJ/CPF destinatário","Chave de acesso","Data de emissão","Base de cálculo do ICMS R$","Valor do ICMS R$","Valor R$"\n'
+        ',"23260914869652000171650010000000021000000018","15/09/2026","0,00","0,00","250,50"\n'
+        ',"23260914869652000171650010000000031000000019","20/09/2026","0,00","0,00","150,00"\n'
+    )
+    csv_as_xlsx.write_text(csv_content, encoding="utf-8-sig")
+
+    processor = NFCeProcessor()
+    records = processor.processar_arquivo(csv_as_xlsx, operacao=OperationType.ENTRADA)
+
+    assert len(records) == 2
+    assert records[0].tipo_documento == DocumentType.NFCE
+    assert records[0].operacao == OperationType.ENTRADA
+    assert records[0].mes == "2026-09"
+    assert records[0].quantidade_autorizada == 1
+    assert records[0].valor_autorizado == Decimal("250.50")
+    assert records[1].valor_autorizado == Decimal("150.00")
+
+def test_nfe_processor_reads_csv_semicolon(tmp_path):
+    csv_as_xlsx = tmp_path / "nfe_saida.xlsx"
+    csv_content = (
+        "Mês;Abrangência;Qtd Autorizadas;Valor Autorizadas;Qtd Canceladas;Valor Canceladas;Qtd Denegadas;Valor Denegadas\n"
+        "Setembro;Interna;2;26.956,00;0;0,00;0;0,00\n"
+    )
+    csv_as_xlsx.write_text(csv_content, encoding="utf-8-sig")
+
+    processor = NFeProcessor()
+    records = processor.processar_arquivo(csv_as_xlsx, operacao=OperationType.SAIDA)
+
+    assert len(records) == 1
+    assert records[0].tipo_documento == DocumentType.NFE
+    assert records[0].operacao == OperationType.SAIDA
+    assert records[0].mes == "Setembro"
+    assert records[0].quantidade_autorizada == 2
+    assert records[0].valor_autorizado == Decimal("26956.00")
+
