@@ -181,12 +181,13 @@ class SigaUiDownloader:
             time.sleep(1.5)
 
         # =========================================================================
-        # Passo 6: Acompanhar status na tabela até "Concluído"
+        # Passo 6: Acompanhar status na tabela até "Concluído" da linha correspondente
         # =========================================================================
         logger.info(f"UI Downloader: Aguardando processamento da solicitação de {doc_upper} - {op_upper}...")
         btn_atualizar = page.locator("button:has-text('Atualizar Status'), .p-button:has-text('Atualizar Status')").first
 
         visao_esperada = "EMISSOR" if op_upper == "SAIDA" else "DESTINAT"
+        matching_row = None
         concluido = False
 
         # Aguarda a primeira linha aparecer na tabela
@@ -197,21 +198,55 @@ class SigaUiDownloader:
 
         for attempt in range(1, self.max_attempts + 1):
             try:
-                row1 = page.locator("table tbody tr").first
-                if row1.is_visible(timeout=3000):
-                    row_text = row1.text_content() or ""
-                    logger.debug(f"UI Downloader [Tentativa {attempt}/{self.max_attempts}]: Linha 1 = {row_text[:90]}")
+                rows = page.locator("table tbody tr")
+                try:
+                    raw_count = rows.count()
+                    count = int(raw_count) if isinstance(raw_count, (int, float)) else 1
+                except Exception:
+                    count = 1
 
-                    if "Concluído" in row_text or "CONCLUIDO" in row_text.upper():
-                        # Validação opcional: verifica se a visão coincide com a operação solicitada
-                        if visao_esperada in row_text.upper() or attempt > 3:
-                            concluido = True
-                            break
-                    elif "Erro" in row_text or "ERRO" in row_text.upper():
+                for idx in range(count):
+                    try:
+                        row = rows.nth(idx) if count > 1 else rows.first
+                    except Exception:
+                        row = rows.first
+
+                    if not row.is_visible(timeout=2000):
+                        continue
+
+                    row_text = (row.text_content() or "").upper()
+
+                    # Checa tipo de documento correspondente
+                    if doc_upper == "NFCE":
+                        if "NFC-E" not in row_text and "NFCE" not in row_text:
+                            continue
+                    else:  # NFE
+                        if ("NF-E" not in row_text and "NFE" not in row_text) or "NFC" in row_text:
+                            continue
+
+                    # Checa visão se informada na linha
+                    if "EMISSOR" in row_text or "DESTINAT" in row_text:
+                        if visao_esperada not in row_text:
+                            continue
+
+                    # Encontrou a linha mais recente correspondente
+                    matching_row = row
+                    logger.debug(f"UI Downloader [Tentativa {attempt}/{self.max_attempts}]: Linha {idx + 1} = {row_text[:90]}")
+
+                    if "CONCLUÍDO" in row_text or "CONCLUIDO" in row_text:
+                        concluido = True
+                        break
+                    elif "ERRO" in row_text:
                         return False, "", 0, f"SEFAZ indicou status ERRO no download: {row_text[:120]}"
+                    else:
+                        # Ainda em processamento, não analisa linhas anteriores mais antigas
+                        break
+
+                if concluido:
+                    break
 
             except Exception as e:
-                logger.debug(f"Aviso ao consultar linha de download: {e}")
+                logger.debug(f"Aviso ao consultar linhas de download: {e}")
 
             # Clica em Atualizar Status
             try:
@@ -223,23 +258,23 @@ class SigaUiDownloader:
             time.sleep(self.polling_interval)
 
         if not concluido:
-            return False, "", 0, f"Tempo limite de {int(self.max_attempts * self.polling_interval)}s atingido aguardando o arquivo."
+            return False, "", 0, f"Tempo limite de {int(self.max_attempts * self.polling_interval)}s atingido aguardando o arquivo de {doc_upper} - {op_upper}."
 
         # =========================================================================
-        # Passo 7: Interceptar e salvar o download do arquivo XLSX
+        # Passo 7: Interceptar e salvar o download do arquivo XLSX da linha correspondente
         # =========================================================================
-        logger.info("UI Downloader: Solicitação pronta! Iniciando download do XLSX...")
+        logger.info(f"UI Downloader: Solicitação pronta! Iniciando download do XLSX ({doc_upper} - {op_upper})...")
         try:
-            row1 = page.locator("table tbody tr").first
+            target_row = matching_row if matching_row and matching_row.is_visible(timeout=2000) else page.locator("table tbody tr").first
             # No DOM real da SEFAZ, o botão de download é um <span class="ng-star-inserted">Download</span> dentro de um <td>
-            dl_candidates = row1.locator("span:has-text('Download'), td:has-text('Download'), a:has-text('Download'), button:has-text('Download')")
+            dl_candidates = target_row.locator("span:has-text('Download'), td:has-text('Download'), a:has-text('Download'), button:has-text('Download')")
             download_elem = dl_candidates.last
 
             if not download_elem.is_visible(timeout=4000):
                 download_elem = dl_candidates.first
 
             if not download_elem.is_visible(timeout=4000):
-                return False, "", 0, "Elemento 'Download' não encontrado na primeira linha da tabela."
+                return False, "", 0, f"Elemento 'Download' não encontrado na linha correspondente da tabela para {doc_upper} - {op_upper}."
 
             with page.expect_download(timeout=30000) as download_info:
                 download_elem.click()

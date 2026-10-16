@@ -185,7 +185,8 @@ def test_nfce_processor_reads_csv_comma_delimited(tmp_path):
 
     assert len(records) == 2
     assert records[0].tipo_documento == DocumentType.NFCE
-    assert records[0].operacao == OperationType.ENTRADA
+    # Auto-detecção de conteúdo: vendas com CNPJ destinatário e chave de emitente são Saídas
+    assert records[0].operacao == OperationType.SAIDA
     assert records[0].mes == "2026-09"
     assert records[0].quantidade_autorizada == 1
     assert records[0].valor_autorizado == Decimal("250.50")

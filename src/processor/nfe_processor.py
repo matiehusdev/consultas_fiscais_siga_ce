@@ -80,6 +80,12 @@ class NFeProcessor:
         logger.info(f"Processando planilha NF-e ({operacao.value}): {caminho_xlsx.name}...")
         records: List[NormalizedRecord] = []
 
+        operacao_efetiva = operacao
+        if "saida" in caminho_xlsx.name.lower():
+            operacao_efetiva = OperationType.SAIDA
+        elif "entrada" in caminho_xlsx.name.lower():
+            operacao_efetiva = OperationType.ENTRADA
+
         try:
             df = _load_dataframe_safely(caminho_xlsx)
 
@@ -158,7 +164,7 @@ class NFeProcessor:
                         v = _parse_decimal(row[interna_col])
                         records.append(NormalizedRecord(
                             tipo_documento=DocumentType.NFE,
-                            operacao=operacao,
+                            operacao=operacao_efetiva,
                             categoria="Interna",
                             mes=mes_val,
                             quantidade_autorizada=qtd_aut,
@@ -172,7 +178,7 @@ class NFeProcessor:
                         v = _parse_decimal(row[interestadual_col])
                         records.append(NormalizedRecord(
                             tipo_documento=DocumentType.NFE,
-                            operacao=operacao,
+                            operacao=operacao_efetiva,
                             categoria="Interestadual",
                             mes=mes_val,
                             quantidade_autorizada=0,
@@ -186,7 +192,7 @@ class NFeProcessor:
                         v = _parse_decimal(row[exterior_col])
                         records.append(NormalizedRecord(
                             tipo_documento=DocumentType.NFE,
-                            operacao=operacao,
+                            operacao=operacao_efetiva,
                             categoria="Exterior",
                             mes=mes_val,
                             quantidade_autorizada=0,
@@ -199,7 +205,7 @@ class NFeProcessor:
                 else:
                     records.append(NormalizedRecord(
                         tipo_documento=DocumentType.NFE,
-                        operacao=operacao,
+                        operacao=operacao_efetiva,
                         categoria=categoria,
                         mes=mes_val,
                         quantidade_autorizada=qtd_aut,

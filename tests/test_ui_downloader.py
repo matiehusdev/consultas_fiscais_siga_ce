@@ -70,6 +70,8 @@ def test_ui_downloader_successful_flow(tmp_path):
             loc.first = mock_link_aqui
         elif "table tbody tr" in selector:
             loc.first = mock_row
+            loc.count.return_value = 1
+            loc.nth.return_value = mock_row
         elif "Emissor" in selector or "Destinatário" in selector:
             loc.first = mock_btn_op
         elif "NF-e" in selector or "NFC-e" in selector:
@@ -132,6 +134,8 @@ def test_ui_downloader_error_status_from_sefaz(tmp_path):
             loc.first = mock_btn_baixar
         elif "table tbody tr" in selector:
             loc.first = mock_row
+            loc.count.return_value = 1
+            loc.nth.return_value = mock_row
         else:
             loc.first = MagicMock(is_visible=MagicMock(return_value=False))
         return loc

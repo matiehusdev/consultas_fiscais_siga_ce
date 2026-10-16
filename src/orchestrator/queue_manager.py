@@ -267,6 +267,12 @@ def _processar_documentos_empresa(
                     else:
                         recs = nfce_proc.processar_arquivo(caminho_arq, operacao=op_enum)
 
+                    # Previne duplicação caso um arquivo tenha sido baixado com nome cruzado
+                    if tipo_doc == "NFCE" and operacao == "ENTRADA":
+                        if any(r.operacao == OperationType.SAIDA for r in recs) and (emp_dir / "nfce_saida.xlsx").exists():
+                            logger.warning(f"Ignorando {nome_arq} pois seu conteúdo é de SAÍDA e nfce_saida.xlsx já existe.")
+                            continue
+
                     # Filtro estrito: seleciona SOMENTE os registros correspondentes ao mês/ano da consulta
                     recs_filtrados = [
                         r for r in recs
@@ -282,25 +288,34 @@ def _processar_documentos_empresa(
             )
             resumo_fiscal = FiscalAggregator.agregar(records_empresa)
 
-            # Salva resultados tabulares no banco
+            # Salva resultados tabulares agregados no banco
             with get_db_context() as db:
-                if records_empresa:
-                    for rec in records_empresa:
+                quadros = [
+                    resumo_fiscal.quadro_nfe_saidas,
+                    resumo_fiscal.quadro_nfe_entradas,
+                    resumo_fiscal.quadro_nfce_saidas,
+                    resumo_fiscal.quadro_nfce_entradas
+                ]
+                salvou_algum = False
+                for q in quadros:
+                    for it in q.itens:
                         crud.save_resultado(
                             db=db,
                             consulta_empresa_id=item_id,
-                            tipo_documento=rec.tipo_documento.value,
-                            operacao=rec.operacao.value,
-                            categoria=rec.categoria,
-                            mes=rec.mes,
-                            qtd_autorizada=rec.quantidade_autorizada,
-                            valor_autorizado=rec.valor_autorizado,
-                            qtd_cancelada=rec.quantidade_cancelada,
-                            valor_cancelado=rec.valor_cancelado,
-                            qtd_denegada=rec.quantidade_denegada,
-                            valor_denegado=rec.valor_denegado
+                            tipo_documento=q.tipo_documento.value,
+                            operacao=q.operacao.value,
+                            categoria=it.categoria,
+                            mes=it.mes,
+                            qtd_autorizada=it.quantidade_autorizada,
+                            valor_autorizado=it.valor_autorizado,
+                            qtd_cancelada=it.quantidade_cancelada,
+                            valor_cancelado=it.valor_cancelado,
+                            qtd_denegada=it.quantidade_denegada,
+                            valor_denegado=it.valor_denegado
                         )
-                else:
+                        salvou_algum = True
+
+                if not salvou_algum:
                     # Registra competência zerada no banco
                     nome_m = NOMES_MESES.get(data_inicio.month, f"Mês {data_inicio.month}")
                     crud.save_resultado(

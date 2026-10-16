@@ -110,3 +110,63 @@ def test_batch_reporter_excel_and_pdf(tmp_path):
     assert ok_pdf is True
     assert pdf_path.exists()
     assert pdf_path.stat().st_size > 0
+
+def test_batch_reporter_exact_he_botelho_and_lm_de_sousa(tmp_path):
+    empresas = [
+        EmpresaResumoLote(
+            razao_social="H E BOTELHO ALGO A MAIS",
+            cnpj="63330299000162",
+            nfe_saidas_val=Decimal("26956.00"),
+            nfe_saidas_qtd=2,
+            nfce_saidas_val=Decimal("0.00"),
+            nfce_saidas_qtd=0,
+            total_saidas_val=Decimal("26956.00"),
+            total_saidas_qtd=2,
+            nfe_entradas_val=Decimal("0.00"),
+            nfe_entradas_qtd=0,
+            nfce_entradas_val=Decimal("0.00"),
+            nfce_entradas_qtd=0,
+            total_entradas_val=Decimal("0.00"),
+            total_entradas_qtd=0,
+            total_canceladas_val=Decimal("0.00"),
+            status="Concluído"
+        ),
+        EmpresaResumoLote(
+            razao_social="LM DE SOUSA",
+            cnpj="14869652000171",
+            nfe_saidas_val=Decimal("0.00"),
+            nfe_saidas_qtd=0,
+            nfce_saidas_val=Decimal("64548.68"),
+            nfce_saidas_qtd=1486,
+            total_saidas_val=Decimal("64548.68"),
+            total_saidas_qtd=1486,
+            nfe_entradas_val=Decimal("57169.40"),
+            nfe_entradas_qtd=99,
+            nfce_entradas_val=Decimal("0.00"),
+            nfce_entradas_qtd=0,
+            total_entradas_val=Decimal("57169.40"),
+            total_entradas_qtd=99,
+            total_canceladas_val=Decimal("0.00"),
+            status="Concluído"
+        )
+    ]
+
+    excel_path = tmp_path / "relatorio_lote_consolidado.xlsx"
+    ok_xl = BatchReporter.gerar_excel(
+        empresas=empresas,
+        lote_id=14,
+        id_lote_str="test-uuid",
+        periodo_str="Setembro de 2026",
+        destino_caminho=excel_path
+    )
+    assert ok_xl is True
+
+    wb = openpyxl.load_workbook(excel_path)
+    ws_final = wb["Relatório Final"]
+    rows = list(ws_final.iter_rows(values_only=True))
+
+    assert rows[0] == ("EMPRESAS", "VALOR ENTRADAS", "VALOR SAIDAS")
+    assert rows[1] == ("H E BOTELHO ALGO A MAIS", 0.0, 26956.0)
+    assert rows[2] == ("LM DE SOUSA", 57169.4, 64548.68)
+    assert rows[3] == ("TOTAL GERAL", 57169.4, 91504.68)
+
