@@ -1,148 +1,185 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard — SIGA Fiscal{% endblock %}
+{% block title %}Dashboard — Giro Empresarial{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
-    <!-- Header banner -->
-    <div class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <span class="inline-block px-3 py-1 bg-emerald-700/60 text-emerald-200 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">
-                Painel Geral
-            </span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">SIGA Fiscal SEFAZ-CE</h2>
-            <p class="text-emerald-100 text-sm mt-1 max-w-xl">
-                Automação segura e estruturada de consultas fiscais de NF-e e NFC-e com certificado digital A1.
+    <!-- Header banner with Giro Empresarial brand gradient -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-[#023047] via-[#043b59] to-[#083c56] rounded-2xl p-6 sm:p-8 text-white shadow-xl border border-[#0b4d73]/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <!-- Subtle decorative glow -->
+        <div class="absolute -top-12 -right-12 w-64 h-64 bg-[#ffb703]/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-64 h-64 bg-[#219ebc]/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/15 text-[#ffb703] text-xs font-bold rounded-full uppercase tracking-wider mb-3">
+                <span class="w-2 h-2 rounded-full bg-[#ffb703] animate-pulse"></span>
+                <span>Painel de Controle Fiscal</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                <span>Giro Empresarial</span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-[#219ebc]/30 text-[#8ecae6] border border-[#219ebc]/40">SEFAZ-CE</span>
+            </h2>
+            <p class="text-slate-200 text-sm mt-2 max-w-xl leading-relaxed">
+                Automação segura e estruturada de consultas fiscais de NF-e e NFC-e com certificado digital A1 e isolamento de sessão.
             </p>
         </div>
-        <div class="flex flex-wrap gap-3">
-            <a href="/consultas/nova" class="inline-flex items-center px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold rounded-lg shadow transition">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <div class="relative z-10 flex flex-wrap gap-3">
+            <a href="/consultas/nova" class="inline-flex items-center px-4 py-2.5 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] text-sm font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                 Nova Consulta
             </a>
-            <a href="/empresas" class="inline-flex items-center px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-lg border border-white/20 transition">
+            <a href="/empresas" class="inline-flex items-center px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 hover:border-white/40 backdrop-blur-sm transition-all duration-200 cursor-pointer">
+                <svg class="w-4 h-4 mr-2 text-[#8ecae6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                 Gerenciar Empresas
             </a>
         </div>
     </div>
 
-    <!-- Quick Stats Cards -->
+    <!-- Quick Stats KPI Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <!-- Card 1: Empresas Cadastradas -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow duration-200 relative overflow-hidden group">
+            <div class="h-1 w-full bg-gradient-to-r from-[#023047] to-[#219ebc] absolute top-0 left-0"></div>
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Empresas Cadastradas</p>
-                    <p class="text-3xl font-bold text-slate-900 mt-1">{{ stats.total_empresas }}</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Empresas Cadastradas</p>
+                    <p class="text-3xl font-extrabold text-[#023047] font-mono mt-1">{{ stats.total_empresas }}</p>
                 </div>
-                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                <div class="w-12 h-12 bg-blue-50 text-[#023047] rounded-xl flex items-center justify-center border border-blue-100 group-hover:scale-105 transition-transform duration-200">
+                    <svg class="w-6 h-6 text-[#219ebc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 text-xs text-slate-500 flex items-center">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
-                {{ stats.empresas_ativas }} ativas • {{ stats.empresas_inativas }} inativas
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+                <span class="flex items-center text-emerald-700 font-medium">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                    {{ stats.empresas_ativas }} ativas
+                </span>
+                <span class="text-slate-400 font-mono">{{ stats.empresas_inativas }} inativas</span>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <!-- Card 2: Consultas Realizadas -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow duration-200 relative overflow-hidden group">
+            <div class="h-1 w-full bg-gradient-to-r from-[#ffb703] to-[#fb8500] absolute top-0 left-0"></div>
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Consultas Realizadas</p>
-                    <p class="text-3xl font-bold text-slate-900 mt-1">{{ stats.total_consultas }}</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Consultas Realizadas</p>
+                    <p class="text-3xl font-extrabold text-[#023047] font-mono mt-1">{{ stats.total_consultas }}</p>
                 </div>
-                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-xl flex items-center justify-center border border-amber-100 group-hover:scale-105 transition-transform duration-200">
+                    <svg class="w-6 h-6 text-[#fb8500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 text-xs text-slate-500">
-                Lotes executados no sistema
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+                <span>Lotes processados</span>
+                <span class="font-mono text-[#023047] font-semibold">100% Auditável</span>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <!-- Card 3: Última Consulta -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow duration-200 relative overflow-hidden group">
+            <div class="h-1 w-full bg-gradient-to-r from-[#219ebc] to-[#8ecae6] absolute top-0 left-0"></div>
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Última Consulta</p>
-                    <p class="text-base font-bold text-slate-900 mt-2">{{ stats.ultima_consulta_data }}</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Última Execução</p>
+                    <p class="text-base font-bold text-slate-900 font-mono mt-2 truncate max-w-[180px]">{{ stats.ultima_consulta_data }}</p>
                 </div>
-                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="w-12 h-12 bg-teal-50 text-teal-700 rounded-xl flex items-center justify-center border border-teal-100 group-hover:scale-105 transition-transform duration-200">
+                    <svg class="w-6 h-6 text-[#219ebc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 text-xs text-slate-500">
-                Histórico persistido em SQLite
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+                <span>Banco local SQLite</span>
+                <span class="text-emerald-600 font-semibold">Sincronizado</span>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <!-- Card 4: Modo de Sessão -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow duration-200 relative overflow-hidden group">
+            <div class="h-1 w-full bg-gradient-to-r from-emerald-600 to-teal-500 absolute top-0 left-0"></div>
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Modo de Sessão</p>
-                    <p class="text-base font-bold text-slate-900 mt-2">Isolada por Empresa</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Modo Operacional</p>
+                    <p class="text-base font-bold text-slate-900 mt-2">Sessão Isolada</p>
                 </div>
-                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center border border-emerald-100 group-hover:scale-105 transition-transform duration-200">
+                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 text-xs text-emerald-600 font-medium">
-                ✓ Certificado manual ativo
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-emerald-700 font-semibold flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                Certificado Digital A1 Ativo
             </div>
         </div>
     </div>
 
     <!-- Navigation Hub Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <a href="/consultas/nova" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition group">
-            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3 group-hover:bg-emerald-600 group-hover:text-white transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <a href="/consultas/nova" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-[#ffb703] hover:shadow-md transition-all duration-200 group cursor-pointer">
+            <div class="w-10 h-10 rounded-lg bg-[#ffb703]/15 text-[#023047] flex items-center justify-center mb-3 group-hover:bg-[#ffb703] transition-colors">
+                <svg class="w-5 h-5 text-[#023047]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
-            <h3 class="font-bold text-slate-800 text-base">Nova Consulta</h3>
-            <p class="text-xs text-slate-500 mt-1">Selecione empresas, períodos, documentos e operações.</p>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-[#023047] transition-colors">Nova Consulta</h3>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">Selecione empresas, períodos, documentos e operações para extração automatizada.</p>
         </a>
 
-        <a href="/empresas" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition group">
-            <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition">
+        <a href="/empresas" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-[#219ebc] hover:shadow-md transition-all duration-200 group cursor-pointer">
+            <div class="w-10 h-10 rounded-lg bg-[#219ebc]/15 text-[#219ebc] flex items-center justify-center mb-3 group-hover:bg-[#219ebc] group-hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             </div>
-            <h3 class="font-bold text-slate-800 text-base">Empresas</h3>
-            <p class="text-xs text-slate-500 mt-1">Cadastro, edição, ativação e remoção com validação de CNPJ.</p>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-[#219ebc] transition-colors">Empresas</h3>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">Cadastro, edição, ativação e vinculação de certificados A1 com validação de CNPJ.</p>
         </a>
 
-        <a href="/historico" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition group">
-            <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mb-3 group-hover:bg-purple-600 group-hover:text-white transition">
+        <a href="/historico" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-[#023047] hover:shadow-md transition-all duration-200 group cursor-pointer">
+            <div class="w-10 h-10 rounded-lg bg-[#023047]/10 text-[#023047] flex items-center justify-center mb-3 group-hover:bg-[#023047] group-hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
-            <h3 class="font-bold text-slate-800 text-base">Histórico</h3>
-            <p class="text-xs text-slate-500 mt-1">Acompanhe consultas anteriores, status, downloads e logs.</p>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-[#023047] transition-colors">Histórico</h3>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">Acompanhe consultas em andamento, relatórios consolidados em Excel e logs de execução.</p>
         </a>
 
-        <a href="/configuracoes" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition group">
-            <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center mb-3 group-hover:bg-slate-700 group-hover:text-white transition">
+        <a href="/configuracoes" class="p-5 bg-white rounded-xl border border-slate-200 hover:border-slate-500 hover:shadow-md transition-all duration-200 group cursor-pointer">
+            <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center mb-3 group-hover:bg-slate-800 group-hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </div>
-            <h3 class="font-bold text-slate-800 text-base">Configurações</h3>
-            <p class="text-xs text-slate-500 mt-1">Ajuste de diretórios, timeouts e parâmetros do Playwright.</p>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-slate-800 transition-colors">Configurações</h3>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">Diagnóstico interativo de autenticação, testes de browser e parâmetros do sistema.</p>
         </a>
     </div>
 
-    <!-- Architectural Principles Card -->
-    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h3 class="text-base font-bold text-slate-900 flex items-center">
-            <svg class="w-5 h-5 text-emerald-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Diretrizes Operacionais do Sistema
-        </h3>
+    <!-- Architectural Principles & Directives Card -->
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex items-center space-x-2 pb-3 border-b border-slate-100">
+            <div class="w-8 h-8 rounded-lg bg-[#023047]/10 flex items-center justify-center text-[#023047]">
+                <svg class="w-4 h-4 text-[#023047]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-slate-900">Diretrizes Operacionais do Giro Empresarial</h3>
+                <p class="text-xs text-slate-500">Conformidade e segurança para o ambiente corporativo fiscal</p>
+            </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
-            <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <p class="font-semibold text-slate-800 mb-1">1. Certificado Digital A1</p>
-                <p>A seleção do certificado é solicitada diretamente pelo navegador para interação manual do usuário. Credenciais ou chaves privadas jamais são interceptadas ou armazenadas.</p>
+            <div class="p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 hover:border-[#219ebc]/40 transition-colors">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="w-5 h-5 rounded-full bg-[#023047] text-[#ffb703] font-bold text-[10px] flex items-center justify-center">1</span>
+                    <p class="font-bold text-slate-900">Certificado Digital A1</p>
+                </div>
+                <p class="text-slate-600 leading-relaxed">Suporte a certificados digitais com criptografia forte. Cada empresa possui chaves protegidas e execução segura sem intervenção.</p>
             </div>
-            <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <p class="font-semibold text-slate-800 mb-1">2. Sessão Isolada por Empresa</p>
-                <p>Cada empresa é processada sequencialmente em uma nova instância limpa de navegador, eliminando contaminações de cookies e garantindo conformidade com o SIGA.</p>
+            <div class="p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 hover:border-[#219ebc]/40 transition-colors">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="w-5 h-5 rounded-full bg-[#023047] text-[#ffb703] font-bold text-[10px] flex items-center justify-center">2</span>
+                    <p class="font-bold text-slate-900">Sessões Isoladas</p>
+                </div>
+                <p class="text-slate-600 leading-relaxed">Cada contribuinte é consultado em sessão limpa de navegador, prevenindo sobreposição de cookies ou contaminação de contexto no SIGA.</p>
             </div>
-            <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <p class="font-semibold text-slate-800 mb-1">3. Integridade Fiscal (NF-e & NFC-e)</p>
-                <p>O movimento principal reflete exclusivamente documentos autorizados. Notas canceladas e denegadas são segregadas para auditoria sem inflar a base de cálculo.</p>
+            <div class="p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 hover:border-[#219ebc]/40 transition-colors">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="w-5 h-5 rounded-full bg-[#023047] text-[#ffb703] font-bold text-[10px] flex items-center justify-center">3</span>
+                    <p class="font-bold text-slate-900">Diferenciação Estrita de Notas</p>
+                </div>
+                <p class="text-slate-600 leading-relaxed">Separação rigorosa entre NF-e (entradas como destinatário / saídas como emitente) e NFC-e (consumidor final), com total fidelidade fiscal.</p>
             </div>
         </div>
     </div>

@@ -1,144 +1,145 @@
 {% extends "base.html" %}
 
-{% block title %}Histórico de Consultas — SIGA Fiscal{% endblock %}
+{% block title %}Histórico de Consultas — Giro Empresarial{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Histórico de Consultas</h2>
-            <p class="text-xs sm:text-sm text-slate-500">Rastreabilidade completa de todas as consultas executadas e arquivos obtidos no SIGA.</p>
+            <h2 class="text-2xl font-extrabold text-[#023047] tracking-tight">Histórico de Consultas Fiscais</h2>
+            <p class="text-xs sm:text-sm text-slate-500">Rastreabilidade completa de todas as consultas executadas no SIGA e relatórios consolidados em Excel.</p>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="window.location.reload()" class="inline-flex items-center px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg shadow-sm transition">
+            <button onclick="window.location.reload()" class="inline-flex items-center px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer">
                 <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 Atualizar
             </button>
-            <a href="/consultas/nova" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                + Nova Consulta
+            <a href="/consultas/nova" class="inline-flex items-center px-4 py-2 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] text-sm font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer">
+                <svg class="w-4 h-4 mr-1.5 text-[#023047]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                Nova Consulta
             </a>
         </div>
     </div>
 
     <!-- Feedback Banner -->
-    <div id="alert-banner" class="hidden p-4 rounded-xl text-sm font-medium"></div>
+    <div id="alert-banner" class="hidden p-4 rounded-xl text-sm font-semibold shadow-sm transition-all duration-200"></div>
 
-    <!-- Active Execution Banner (Live) -->
-    <div id="banner-execucao-ativa" class="{% if not is_running %}hidden{% endif %} bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-lg border border-slate-700 space-y-3">
+    <!-- Active Execution Banner (Live SSE Monitor) -->
+    <div id="banner-execucao-ativa" class="{% if not is_running %}hidden{% endif %} relative overflow-hidden bg-gradient-to-r from-[#023047] via-[#043b59] to-[#083c56] text-white p-5 rounded-2xl shadow-xl border border-[#0b4d73]/60 space-y-3">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <span class="relative flex h-3.5 w-3.5">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ffb703] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#ffb703]"></span>
                 </span>
                 <div>
-                    <h3 class="text-sm font-bold text-white tracking-wide uppercase">Execução Ativa no SIGA SEFAZ-CE</h3>
-                    <p id="live-banner-empresa" class="text-xs text-slate-300">Processando lote sequencialmente...</p>
+                    <h3 class="text-sm font-extrabold text-[#ffb703] tracking-wider uppercase">Execução Ativa no SIGA SEFAZ-CE</h3>
+                    <p id="live-banner-empresa" class="text-xs text-slate-200">Processando lote sequencialmente...</p>
                 </div>
             </div>
-            <button onclick="cancelarExecucao()" class="px-3 py-1.5 bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold rounded-lg transition shadow-sm flex items-center">
+            <button onclick="cancelarExecucao()" class="px-3.5 py-1.5 bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center cursor-pointer">
                 <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                Interromper Execução
+                Interromper
             </button>
         </div>
-        <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800/80 font-mono text-xs text-emerald-400 flex items-center justify-between">
+        <div class="bg-[#011c2a]/80 p-3 rounded-xl border border-[#0b4d73]/50 font-mono text-xs text-[#8ecae6] flex items-center justify-between">
             <span id="live-banner-mensagem" class="truncate">Conectando ao orquestrador...</span>
-            <span id="live-banner-etapa" class="text-slate-400 text-[11px] ml-2 shrink-0">AGUARDANDO</span>
+            <span id="live-banner-etapa" class="text-[#ffb703] text-[11px] ml-2 shrink-0 font-bold">AGUARDANDO</span>
         </div>
     </div>
 
     <!-- History Table -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50">
+                <thead class="bg-slate-50/90">
                     <tr>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-700">Data/Hora</th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-700">Lote</th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-700">Período Fiscal</th>
-                        <th scope="col" class="px-4 py-3 text-center font-semibold text-slate-700">Documentos</th>
-                        <th scope="col" class="px-4 py-3 text-center font-semibold text-slate-700">Operações</th>
-                        <th scope="col" class="px-4 py-3 text-center font-semibold text-slate-700">Empresas</th>
-                        <th scope="col" class="px-4 py-3 text-center font-semibold text-slate-700">Status</th>
-                        <th scope="col" class="px-4 py-3 text-center font-semibold text-slate-700">Ações</th>
+                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#023047] tracking-tight">Data/Hora</th>
+                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#023047] tracking-tight">Lote</th>
+                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#023047] tracking-tight">Período Fiscal</th>
+                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#023047] tracking-tight">Documentos</th>
+                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#023047] tracking-tight">Operações</th>
+                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#023047] tracking-tight">Empresas</th>
+                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#023047] tracking-tight">Status</th>
+                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#023047] tracking-tight">Ações & Relatórios</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-consultas-body" class="divide-y divide-slate-200 bg-white">
                     {% if consultas %}
                         {% for c in consultas %}
-                        <tr id="row-consulta-{{ c.id }}" class="hover:bg-slate-50/80 transition">
-                            <td class="px-4 py-3 text-xs text-slate-600 font-medium whitespace-nowrap">
+                        <tr id="row-consulta-{{ c.id }}" class="hover:bg-slate-50/80 transition-colors duration-150">
+                            <td class="px-4 py-3.5 text-xs text-slate-600 font-medium whitespace-nowrap">
                                 {{ c.criado_em.strftime("%d/%m/%Y %H:%M:%S") if c.criado_em else "—" }}
                             </td>
-                            <td class="px-4 py-3 font-mono text-xs text-slate-800">
-                                <span class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-semibold" title="{{ c.id_lote }}">#{{ c.id }} • {{ c.id_lote[:8] }}</span>
+                            <td class="px-4 py-3.5 font-mono text-xs text-slate-800">
+                                <span class="bg-[#023047]/10 text-[#023047] px-2 py-0.5 rounded-md font-bold" title="{{ c.id_lote }}">#{{ c.id }} • {{ c.id_lote[:8] }}</span>
                             </td>
-                            <td class="px-4 py-3 text-xs text-slate-700 font-medium whitespace-nowrap">
+                            <td class="px-4 py-3.5 text-xs text-slate-700 font-semibold whitespace-nowrap">
                                 {{ c.data_inicio.strftime("%d/%m/%Y") }} a {{ c.data_fim.strftime("%d/%m/%Y") }}
                             </td>
-                            <td class="px-4 py-3 text-center text-xs whitespace-nowrap">
-                                {% if c.consultar_nfe %}<span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-medium mr-1 text-[11px]">NF-e</span>{% endif %}
-                                {% if c.consultar_nfce %}<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-medium text-[11px]">NFC-e</span>{% endif %}
+                            <td class="px-4 py-3.5 text-center text-xs whitespace-nowrap">
+                                {% if c.consultar_nfe %}<span class="px-2 py-0.5 rounded-md bg-[#219ebc]/15 text-[#023047] font-bold mr-1 text-[11px] border border-[#219ebc]/30">NF-e</span>{% endif %}
+                                {% if c.consultar_nfce %}<span class="px-2 py-0.5 rounded-md bg-[#ffb703]/20 text-[#023047] font-bold text-[11px] border border-[#ffb703]/40">NFC-e</span>{% endif %}
                             </td>
-                            <td class="px-4 py-3 text-center text-xs whitespace-nowrap">
-                                {% if c.consultar_entradas %}<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium mr-1 text-[11px]">Entradas</span>{% endif %}
-                                {% if c.consultar_saidas %}<span class="px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-medium text-[11px]">Saídas</span>{% endif %}
+                            <td class="px-4 py-3.5 text-center text-xs whitespace-nowrap">
+                                {% if c.consultar_entradas %}<span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-semibold mr-1 text-[11px] border border-amber-200">Entradas</span>{% endif %}
+                                {% if c.consultar_saidas %}<span class="px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 font-semibold text-[11px] border border-teal-200">Saídas</span>{% endif %}
                             </td>
-                            <td class="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">
+                            <td class="px-4 py-3.5 text-center text-xs font-semibold whitespace-nowrap font-mono">
                                 <span class="text-slate-800">{{ c.total_empresas }} total</span> •
-                                <span class="text-emerald-600">{{ c.sucesso_empresas }} ok</span> •
+                                <span class="text-emerald-700 font-bold">{{ c.sucesso_empresas }} ok</span> •
                                 <span class="text-rose-600">{{ c.erro_empresas }} erro</span>
                             </td>
-                            <td class="px-4 py-3 text-center whitespace-nowrap">
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 {% if c.status == 'CONCLUIDO' %}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">✓ Concluído</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">✓ Concluído</span>
                                 {% elif c.status == 'EM_ANDAMENTO' %}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 animate-pulse">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 animate-pulse">
                                         <svg class="animate-spin -ml-0.5 mr-1.5 h-3 w-3 text-amber-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                         Em Andamento
                                     </span>
                                 {% elif c.status == 'ERRO_PARCIAL' %}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">Erro Parcial</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800">Erro Parcial</span>
                                 {% elif c.status == 'ERRO_TOTAL' %}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">Erro Total</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Erro Total</span>
                                 {% elif c.status == 'CANCELADO' %}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Cancelado</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Cancelado</span>
                                 {% else %}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">Pendente</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">Pendente</span>
                                 {% endif %}
                             </td>
-                            <td class="px-4 py-3 text-center whitespace-nowrap text-xs space-x-1">
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap text-xs space-x-1.5">
                                 <!-- Botões Diretos de Download do Relatório Consolidado -->
                                 {% if c.status == 'CONCLUIDO' %}
-                                    <a href="/api/consultas/{{ c.id }}/relatorio-excel" target="_blank" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded font-semibold transition inline-flex items-center shadow-2xs" title="Baixar Relatório Final em Excel (conforme modelo)">
-                                        <svg class="w-3.5 h-3.5 mr-1 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm8 10l-2-2.5L8 13H6l3-3.75L6.5 6h2l1.5 2.5L11.5 6h2l-2.5 3.25L14 13h-2z"/></svg>
+                                    <a href="/api/consultas/{{ c.id }}/relatorio-excel" target="_blank" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg font-bold transition-colors inline-flex items-center shadow-xs cursor-pointer" title="Baixar Relatório Final em Excel">
+                                        <svg class="w-3.5 h-3.5 mr-1 text-emerald-700" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm8 10l-2-2.5L8 13H6l3-3.75L6.5 6h2l1.5 2.5L11.5 6h2l-2.5 3.25L14 13h-2z"/></svg>
                                         Excel
                                     </a>
-                                    <a href="/api/consultas/{{ c.id }}/relatorio-pdf" target="_blank" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded font-semibold transition inline-flex items-center shadow-2xs" title="Baixar Relatório Final em PDF">
+                                    <a href="/api/consultas/{{ c.id }}/relatorio-pdf" target="_blank" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded-lg font-bold transition-colors inline-flex items-center shadow-xs cursor-pointer" title="Baixar Relatório Final em PDF">
                                         <svg class="w-3.5 h-3.5 mr-1 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"/><path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
                                         PDF
                                     </a>
                                 {% endif %}
 
                                 <!-- Botão Detalhes -->
-                                <button onclick="verDetalhes({{ c.id }})" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-medium transition" title="Ver detalhes das empresas">
+                                <button onclick="verDetalhes({{ c.id }})" class="px-2.5 py-1.5 bg-[#023047]/10 hover:bg-[#023047] hover:text-[#ffb703] text-[#023047] rounded-lg font-bold transition-colors cursor-pointer" title="Ver detalhes das empresas">
                                     Detalhes
                                 </button>
 
                                 <!-- Botões de Ação Dinâmicos -->
                                 {% if c.status == 'PENDENTE' %}
-                                    <button onclick="executarConsulta({{ c.id }})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold transition shadow-sm inline-flex items-center">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+                                    <button onclick="executarConsulta({{ c.id }})" class="px-3 py-1.5 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] rounded-lg font-extrabold transition-colors shadow-sm inline-flex items-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
                                         Executar
                                     </button>
                                 {% elif c.status in ['ERRO_PARCIAL', 'ERRO_TOTAL'] %}
-                                    <button onclick="repetirErros({{ c.id }})" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded font-semibold transition shadow-sm inline-flex items-center">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    <button onclick="repetirErros({{ c.id }})" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold transition-colors shadow-sm inline-flex items-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                         Repetir Erros
                                     </button>
                                 {% elif c.status == 'EM_ANDAMENTO' %}
-                                    <button onclick="cancelarExecucao()" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded font-semibold transition shadow-sm">
+                                    <button onclick="cancelarExecucao()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold transition-colors shadow-sm cursor-pointer">
                                         Parar
                                     </button>
                                 {% endif %}
@@ -147,7 +148,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="8" class="px-4 py-10 text-center text-slate-400 text-sm">
+                            <td colspan="8" class="px-4 py-12 text-center text-slate-400 text-sm">
                                 Nenhuma consulta realizada até o momento.
                             </td>
                         </tr>
@@ -159,14 +160,14 @@
 </div>
 
 <!-- Modal Detalhes do Lote -->
-<div id="modal-detalhes" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+<div id="modal-detalhes" class="hidden fixed inset-0 z-50 overflow-y-auto bg-[#023047]/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/90">
             <div>
-                <h3 class="text-base font-bold text-slate-900" id="modal-titulo">Detalhes da Consulta</h3>
+                <h3 class="text-base font-bold text-[#023047]" id="modal-titulo">Detalhes da Consulta</h3>
                 <p class="text-xs text-slate-500" id="modal-subtitulo">Progresso individual por contribuinte cadastrado</p>
             </div>
-            <button onclick="fecharModalDetalhes()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+            <button onclick="fecharModalDetalhes()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
@@ -175,7 +176,7 @@
         </div>
         <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
             <div id="modal-acoes-extras" class="space-x-2"></div>
-            <button onclick="fecharModalDetalhes()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition">
+            <button onclick="fecharModalDetalhes()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer">
                 Fechar
             </button>
         </div>
@@ -189,7 +190,7 @@
 
     function showAlert(msg, isSuccess = true) {
         const banner = document.getElementById("alert-banner");
-        banner.className = `p-4 rounded-xl text-sm font-medium mb-4 ${isSuccess ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`;
+        banner.className = `p-4 rounded-xl text-sm font-semibold mb-4 border ${isSuccess ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'}`;
         banner.textContent = msg;
         banner.classList.remove("hidden");
         setTimeout(() => banner.classList.add("hidden"), 5000);
@@ -263,30 +264,30 @@
             // Botão no modal se necessário
             acoesExtras.innerHTML = '';
             if (data.consulta.status === 'PENDENTE' && !data.em_execucao) {
-                acoesExtras.innerHTML = `<button onclick="executarConsulta(${data.consulta.id}); fecharModalDetalhes();" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold">▶ Executar Agora</button>`;
+                acoesExtras.innerHTML = `<button onclick="executarConsulta(${data.consulta.id}); fecharModalDetalhes();" class="px-3 py-1.5 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] rounded-lg text-xs font-bold cursor-pointer">▶ Executar Agora</button>`;
             } else if (['ERRO_PARCIAL', 'ERRO_TOTAL'].includes(data.consulta.status)) {
-                acoesExtras.innerHTML = `<button onclick="repetirErros(${data.consulta.id}); fecharModalDetalhes();" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold">↻ Repetir Erros</button>`;
+                acoesExtras.innerHTML = `<button onclick="repetirErros(${data.consulta.id}); fecharModalDetalhes();" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold cursor-pointer">↻ Repetir Erros</button>`;
             }
 
             let html = '';
-            // Se concluído, destaca o Relatório Final Consolidado (Layout solicitado: EMPRESAS | ENTRADAS | SAIDAS)
+            // Se concluído, destaca o Relatório Final Consolidado (Layout: EMPRESAS | ENTRADAS | SAIDAS)
             if (data.consulta.status === 'CONCLUIDO') {
                 html += `
-                    <div class="p-4 bg-emerald-50/90 border border-emerald-200 rounded-xl mb-3 shadow-2xs space-y-2.5">
+                    <div class="p-4 bg-gradient-to-r from-blue-50/70 to-cyan-50/60 border border-blue-200/80 rounded-xl mb-3 shadow-xs space-y-2.5">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div>
-                                <span class="text-xs font-bold text-emerald-950 flex items-center">
-                                    <svg class="w-4 h-4 mr-1.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm8 10l-2-2.5L8 13H6l3-3.75L6.5 6h2l1.5 2.5L11.5 6h2l-2.5 3.25L14 13h-2z"/></svg>
-                                    Relatório Final Consolidado
+                                <span class="text-xs font-bold text-[#023047] flex items-center">
+                                    <svg class="w-4 h-4 mr-1.5 text-[#219ebc]" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm8 10l-2-2.5L8 13H6l3-3.75L6.5 6h2l1.5 2.5L11.5 6h2l-2.5 3.25L14 13h-2z"/></svg>
+                                    Relatório Consolidado do Lote
                                 </span>
-                                <span class="text-[11px] text-emerald-700">Layout organizado: <strong>EMPRESAS | VALOR ENTRADAS | VALOR SAIDAS</strong></span>
+                                <span class="text-[11px] text-slate-600">Layout organizado: <strong>EMPRESAS | VALOR ENTRADAS | VALOR SAÍDAS</strong></span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <a href="/api/consultas/${data.consulta.id}/relatorio-excel" target="_blank" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition inline-flex items-center">
+                                <a href="/api/consultas/${data.consulta.id}/relatorio-excel" target="_blank" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition inline-flex items-center cursor-pointer">
                                     <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm8 10l-2-2.5L8 13H6l3-3.75L6.5 6h2l1.5 2.5L11.5 6h2l-2.5 3.25L14 13h-2z"/></svg>
                                     Baixar Excel (.xlsx)
                                 </a>
-                                <a href="/api/consultas/${data.consulta.id}/relatorio-pdf" target="_blank" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm transition inline-flex items-center">
+                                <a href="/api/consultas/${data.consulta.id}/relatorio-pdf" target="_blank" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm transition inline-flex items-center cursor-pointer">
                                     <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"/><path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
                                     Baixar PDF
                                 </a>
@@ -309,30 +310,30 @@
                 }
 
                 let modoBadge = emp.tem_certificado 
-                    ? '<span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] rounded font-semibold border border-emerald-200">A1 Autônomo</span>'
-                    : '<span class="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded font-medium">Manual</span>';
+                    ? '<span class="px-2 py-0.5 bg-blue-50 text-[#023047] text-[10px] rounded-md font-bold border border-blue-200">A1 Autônomo</span>'
+                    : '<span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded-md font-medium">Manual</span>';
 
                 const totaisHtml = emp.totais ? `
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5 pt-2 border-t border-slate-200/70 text-xs">
-                        <div class="bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs">
-                            <span class="text-[10px] text-slate-500 font-medium block">Total Saídas (Mês)</span>
-                            <span class="font-bold text-emerald-700 text-xs">R$ ${Number(emp.totais.total_saidas_val).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                            <span class="text-[10px] text-slate-400 block">${emp.totais.total_saidas_qtd} doc(s)</span>
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Total Saídas (Mês)</span>
+                            <span class="font-extrabold text-emerald-700 font-mono text-xs">R$ ${Number(emp.totais.total_saidas_val).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span class="text-[10px] text-slate-400 block font-mono">${emp.totais.total_saidas_qtd} doc(s)</span>
                         </div>
-                        <div class="bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs">
-                            <span class="text-[10px] text-slate-500 font-medium block">Total Entradas (Mês)</span>
-                            <span class="font-bold text-amber-700 text-xs">R$ ${Number(emp.totais.total_entradas_val).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                            <span class="text-[10px] text-slate-400 block">${emp.totais.total_entradas_qtd} doc(s)</span>
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Total Entradas (Mês)</span>
+                            <span class="font-extrabold text-amber-700 font-mono text-xs">R$ ${Number(emp.totais.total_entradas_val).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span class="text-[10px] text-slate-400 block font-mono">${emp.totais.total_entradas_qtd} doc(s)</span>
                         </div>
-                        <div class="bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs col-span-2 sm:col-span-1">
-                            <span class="text-[10px] text-slate-500 font-medium block">Canceladas (Auditoria)</span>
-                            <span class="font-semibold text-slate-600 text-xs">R$ ${Number(emp.totais.total_canceladas_val).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs col-span-2 sm:col-span-1">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Canceladas (Auditoria)</span>
+                            <span class="font-bold text-slate-600 font-mono text-xs">R$ ${Number(emp.totais.total_canceladas_val).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
                     </div>
                 ` : '';
 
                 html += `
-                    <div class="p-3 border border-slate-200 rounded-xl bg-slate-50/60 flex flex-col gap-1.5">
+                    <div class="p-3.5 border border-slate-200/90 rounded-xl bg-slate-50/70 flex flex-col gap-1.5">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-slate-900 text-xs">${emp.razao_social}</span>
                             <div class="flex items-center gap-1.5">
@@ -354,7 +355,7 @@
             // Se houver arquivos e relatórios gerados
             if (data.arquivos && data.arquivos.length > 0) {
                 html += '<div class="mt-4 pt-3 border-t border-slate-200">';
-                html += '<h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center"><svg class="w-4 h-4 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Arquivos e Relatórios Gerados</h4>';
+                html += '<h4 class="text-xs font-bold text-[#023047] uppercase tracking-wider mb-2 flex items-center"><svg class="w-4 h-4 mr-1 text-[#219ebc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Arquivos e Relatórios Gerados</h4>';
                 html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">';
                 data.arquivos.forEach(arq => {
                     let iconBg = 'bg-slate-100 text-slate-700';
@@ -377,12 +378,12 @@
                     }
 
                     html += `
-                        <a href="/api/arquivos/${arq.id}/download" target="_blank" class="p-2.5 rounded-lg border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/40 transition flex items-center justify-between group">
+                        <a href="/api/arquivos/${arq.id}/download" target="_blank" class="p-2.5 rounded-xl border border-slate-200 hover:border-[#ffb703] hover:bg-amber-50/20 transition-all flex items-center justify-between group cursor-pointer">
                             <div class="flex items-center space-x-2 truncate">
-                                <span class="px-2 py-1 rounded text-[10px] font-bold ${iconBg}">${tipoLabel}</span>
-                                <span class="text-xs font-medium text-slate-800 truncate">${arq.nome_arquivo}</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${iconBg}">${tipoLabel}</span>
+                                <span class="text-xs font-semibold text-slate-800 truncate">${arq.nome_arquivo}</span>
                             </div>
-                            <svg class="w-4 h-4 text-slate-400 group-hover:text-emerald-600 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-[#023047] shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         </a>
                     `;
                 });

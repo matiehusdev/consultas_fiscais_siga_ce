@@ -33,8 +33,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="SIGA Fiscal",
-    description="Sistema de Automação de Consultas Fiscais SEFAZ-CE com Certificado A1",
+    title="Giro Empresarial",
+    description="Sistema de Gestão e Automação de Consultas Fiscais SEFAZ-CE com Certificado A1",
     version="1.0.0",
     lifespan=lifespan
 )

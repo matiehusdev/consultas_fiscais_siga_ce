@@ -3,73 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SIGA Fiscal — Automação SEFAZ-CE{% endblock %}</title>
+    <title>{% block title %}Giro Empresarial — Gestão Fiscal SEFAZ-CE{% endblock %}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        },
-                        ceara: {
-                            green: '#008744',
-                            gold: '#ffa700',
-                            blue: '#0057b7',
+                        giro: {
+                            navy: '#023047',
+                            'navy-dark': '#011c2a',
+                            'navy-light': '#083c56',
+                            gold: '#ffb703',
+                            'gold-hover': '#fb8500',
+                            teal: '#219ebc',
+                            'teal-light': '#8ecae6',
+                            surface: '#f8fafc',
                         }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
                     }
                 }
             }
         }
     </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'Fira Code', monospace; }
+        /* Smooth scrolling & accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-[#ffb703] selection:text-[#023047]">
 
-    <!-- Top Navigation Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
-                    SF
+    <!-- Top Navigation Bar (Giro Empresarial Brand Identity) -->
+    <header class="bg-[#023047] border-b border-[#083c56] sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand / Logo -->
+                <a href="/" class="flex items-center space-x-3 group cursor-pointer">
+                    <div class="relative overflow-hidden rounded-xl bg-[#023047] p-1 border border-[#083c56] shadow-inner group-hover:border-[#ffb703]/50 transition-colors">
+                        <img src="/static/img/logo_giro_empresarial.png?v=2" alt="Giro Empresarial Logo" class="h-9 w-9 object-contain transform group-hover:scale-105 transition-transform duration-200">
+                    </div>
+                    <div>
+                        <div class="flex items-baseline space-x-1.5 leading-none">
+                            <span class="text-xl font-extrabold text-[#ffb703] tracking-tight">GIRO</span>
+                            <span class="text-xl font-semibold text-[#219ebc] tracking-tight italic">empresarial</span>
+                        </div>
+                        <p class="text-[10px] text-slate-300 font-medium tracking-wider uppercase mt-1">Inteligência Fiscal • SEFAZ-CE</p>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-1.5" aria-label="Navegação Principal">
+                    <a href="/" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer {% if active_page == 'dashboard' %}bg-[#ffb703] text-[#023047] font-bold shadow-sm{% else %}text-slate-200 hover:text-white hover:bg-white/10{% endif %}">
+                        Dashboard
+                    </a>
+                    <a href="/empresas" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer {% if active_page == 'empresas' %}bg-[#ffb703] text-[#023047] font-bold shadow-sm{% else %}text-slate-200 hover:text-white hover:bg-white/10{% endif %}">
+                        Empresas
+                    </a>
+                    <a href="/consultas/nova" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer {% if active_page == 'nova_consulta' %}bg-[#ffb703] text-[#023047] font-bold shadow-sm{% else %}text-slate-200 hover:text-white hover:bg-white/10{% endif %}">
+                        Nova Consulta
+                    </a>
+                    <a href="/historico" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer {% if active_page == 'historico' %}bg-[#ffb703] text-[#023047] font-bold shadow-sm{% else %}text-slate-200 hover:text-white hover:bg-white/10{% endif %}">
+                        Histórico
+                    </a>
+                    <a href="/configuracoes" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer {% if active_page == 'configuracoes' %}bg-[#ffb703] text-[#023047] font-bold shadow-sm{% else %}text-slate-200 hover:text-white hover:bg-white/10{% endif %}">
+                        Configurações
+                    </a>
+                </nav>
+
+                <!-- Quick Action CTA -->
+                <div class="hidden lg:flex items-center space-x-3">
+                    <a href="/consultas/nova" class="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] shadow transition-all duration-150 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        Nova Consulta
+                    </a>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold text-slate-900 tracking-tight leading-none">SIGA Fiscal</h1>
-                    <p class="text-xs text-slate-500 font-medium">Automação SEFAZ-CE • Certificado A1</p>
+
+                <!-- Mobile menu button -->
+                <div class="flex md:hidden">
+                    <button type="button" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white hover:bg-white/10 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffb703]" aria-expanded="false" aria-label="Abrir menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
                 </div>
             </div>
 
-            <!-- Navigation Links -->
-            <nav class="flex items-center space-x-1 sm:space-x-2">
-                <a href="/" class="px-3 py-2 rounded-md text-sm font-medium {% if active_page == 'dashboard' %}bg-emerald-50 text-emerald-700 font-semibold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+            <!-- Mobile Navigation Drawer -->
+            <div id="mobile-menu" class="hidden md:hidden pb-3 pt-2 border-t border-[#083c56] space-y-1">
+                <a href="/" class="block px-3 py-2 rounded-md text-base font-medium {% if active_page == 'dashboard' %}bg-[#ffb703] text-[#023047] font-bold{% else %}text-slate-200 hover:bg-white/10{% endif %}">
                     Dashboard
                 </a>
-                <a href="/empresas" class="px-3 py-2 rounded-md text-sm font-medium {% if active_page == 'empresas' %}bg-emerald-50 text-emerald-700 font-semibold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                <a href="/empresas" class="block px-3 py-2 rounded-md text-base font-medium {% if active_page == 'empresas' %}bg-[#ffb703] text-[#023047] font-bold{% else %}text-slate-200 hover:bg-white/10{% endif %}">
                     Empresas
                 </a>
-                <a href="/consultas/nova" class="px-3 py-2 rounded-md text-sm font-medium {% if active_page == 'nova_consulta' %}bg-emerald-50 text-emerald-700 font-semibold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                <a href="/consultas/nova" class="block px-3 py-2 rounded-md text-base font-medium {% if active_page == 'nova_consulta' %}bg-[#ffb703] text-[#023047] font-bold{% else %}text-slate-200 hover:bg-white/10{% endif %}">
                     Nova Consulta
                 </a>
-                <a href="/historico" class="px-3 py-2 rounded-md text-sm font-medium {% if active_page == 'historico' %}bg-emerald-50 text-emerald-700 font-semibold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                <a href="/historico" class="block px-3 py-2 rounded-md text-base font-medium {% if active_page == 'historico' %}bg-[#ffb703] text-[#023047] font-bold{% else %}text-slate-200 hover:bg-white/10{% endif %}">
                     Histórico
                 </a>
-                <a href="/configuracoes" class="px-3 py-2 rounded-md text-sm font-medium {% if active_page == 'configuracoes' %}bg-emerald-50 text-emerald-700 font-semibold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                <a href="/configuracoes" class="block px-3 py-2 rounded-md text-base font-medium {% if active_page == 'configuracoes' %}bg-[#ffb703] text-[#023047] font-bold{% else %}text-slate-200 hover:bg-white/10{% endif %}">
                     Configurações
                 </a>
-            </nav>
+            </div>
         </div>
     </header>
 
@@ -79,12 +128,27 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-            SIGA Fiscal v1.0.0 — SEFAZ-CE • Sistema Seguro com Sessões Isoladas e Autenticação Manual A1
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center space-x-2">
+                <img src="/static/img/logo_giro_empresarial.png?v=2" alt="Logo Giro Empresarial" class="h-5 w-5 object-contain rounded">
+                <span class="font-semibold text-slate-700">Giro Empresarial</span>
+                <span>• Versão 1.0.0</span>
+            </div>
+            <div>
+                Automação & Gestão Fiscal SEFAZ-CE • Sessões Seguras Isoladas por Contribuinte
+            </div>
         </div>
     </footer>
 
+    <script>
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
