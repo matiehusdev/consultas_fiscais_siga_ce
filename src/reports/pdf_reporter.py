@@ -126,11 +126,20 @@ class PdfReporter:
         # ============================================================
         elements.append(Paragraph("1. DEMONSTRATIVO EXECUTIVO CONSOLIDADO", secao_style))
 
+        th_exec = ParagraphStyle(
+            "THExecWhite",
+            parent=normal_style,
+            fontSize=8,
+            leading=10,
+            fontName="Helvetica-Bold",
+            textColor=colors.white
+        )
+
         dados_executivo = [
             [
-                Paragraph("<b>EMPRESAS</b>", cell_bold),
-                Paragraph("<b>VALOR ENTRADAS</b>", cell_bold),
-                Paragraph("<b>VALOR SAIDAS</b>", cell_bold)
+                Paragraph("<b>EMPRESAS</b>", th_exec),
+                Paragraph("<b>VALOR ENTRADAS</b>", th_exec),
+                Paragraph("<b>VALOR SAÍDAS</b>", th_exec)
             ],
             [
                 Paragraph(f"<b>{razao_social}</b>", cell_style),

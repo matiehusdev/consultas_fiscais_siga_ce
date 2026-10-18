@@ -317,34 +317,31 @@ class BatchReporter:
             cell_right = ParagraphStyle("CellR", parent=styles["Normal"], fontSize=8, leading=10, alignment=2)
             cell_right_bold = ParagraphStyle("CellRB", parent=styles["Normal"], fontSize=8, leading=10, fontName="Helvetica-Bold", alignment=2)
 
+            # Estilos com texto em branco de alto contraste para os títulos das colunas
+            th_center = ParagraphStyle("THCenter", parent=styles["Normal"], fontSize=9, leading=11, fontName="Helvetica-Bold", alignment=1, textColor=colors.white)
+            th_left = ParagraphStyle("THLeft", parent=styles["Normal"], fontSize=9, leading=11, fontName="Helvetica-Bold", alignment=0, textColor=colors.white)
+            th_right = ParagraphStyle("THRight", parent=styles["Normal"], fontSize=9, leading=11, fontName="Helvetica-Bold", alignment=2, textColor=colors.white)
+
             elements = []
             elements.append(Paragraph(f"SIGA FISCAL — RELATÓRIO EXECUTIVO CONSOLIDADO (LOTE #{lote_id})", titulo_style))
             elements.append(Paragraph(f"<b>Período Fiscal:</b> {periodo_str} | <b>Identificador:</b> {id_lote_str} | <b>Empresas no Lote:</b> {len(empresas)}", subtitulo_style))
             elements.append(Spacer(1, 14))
 
             # ============================================================
-            # QUADRO 1: RELATÓRIO EXECUTIVO PRINCIPAL (EMPRESAS | VALOR ENTRADAS | VALOR SAIDAS)
+            # QUADRO 1: DEMONSTRATIVO EXECUTIVO CONSOLIDADO
             # ============================================================
             elements.append(Paragraph("1. DEMONSTRATIVO EXECUTIVO CONSOLIDADO", secao_style))
 
             table_data = [
                 [
-                    Paragraph("<b>#</b>", cell_center),
-                    Paragraph("<b>EMPRESAS</b>", cell_bold),
-                    Paragraph("<b>VALOR ENTRADAS</b>", cell_right_bold),
-                    Paragraph("<b>VALOR SAIDAS</b>", cell_right_bold)
+                    Paragraph("<b>#</b>", th_center),
+                    Paragraph("<b>EMPRESAS</b>", th_left),
+                    Paragraph("<b>VALOR ENTRADAS</b>", th_right),
+                    Paragraph("<b>VALOR SAÍDAS</b>", th_right)
                 ]
             ]
 
-            tot_sai = Decimal("0.00")
-            tot_ent = Decimal("0.00")
-            tot_canc = Decimal("0.00")
-
             for idx, emp in enumerate(empresas, start=1):
-                tot_sai += emp.total_saidas_val
-                tot_ent += emp.total_entradas_val
-                tot_canc += emp.total_canceladas_val
-
                 table_data.append([
                     Paragraph(str(idx), cell_center),
                     Paragraph(f"<b>{emp.razao_social}</b><br/><font color='#64748B' size='7'>CNPJ: {format_cnpj(emp.cnpj)}</font>", cell_norm),
@@ -352,79 +349,17 @@ class BatchReporter:
                     Paragraph(f"<font color='#047857'><b>{_format_moeda(emp.total_saidas_val)}</b></font>", cell_right)
                 ])
 
-            # Linha de Totais Gerais
-            table_data.append([
-                Paragraph("", cell_center),
-                Paragraph("<b>TOTAL GERAL</b>", cell_bold),
-                Paragraph(f"<font color='#B45309'><b>{_format_moeda(tot_ent)}</b></font>", cell_right_bold),
-                Paragraph(f"<font color='#047857'><b>{_format_moeda(tot_sai)}</b></font>", cell_right_bold)
-            ])
-
-            t = Table(table_data, colWidths=[30, 370, 180, 180])
+            t = Table(table_data, colWidths=[35, 385, 180, 180])
             t.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#1E293B")),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -2), [colors.white, colors.HexColor("#F8FAFC")]),
-                ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor("#E2E8F0")),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-                ('TOPPADDING', (0, 0), (-1, -1), 5),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")]),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ]))
             elements.append(t)
-            elements.append(Spacer(1, 14))
-
-            # ============================================================
-            # QUADRO 2: AUDITORIA E DESMEMBRAMENTO DE MODELOS
-            # ============================================================
-            elements.append(Paragraph("2. AUDITORIA E DESMEMBRAMENTO POR MODELO DE DOCUMENTO", secao_style))
-
-            table_auditoria = [
-                [
-                    Paragraph("<b>#</b>", cell_center),
-                    Paragraph("<b>Empresa</b>", cell_bold),
-                    Paragraph("<b>NF-e Saídas</b>", cell_right_bold),
-                    Paragraph("<b>NFC-e Saídas</b>", cell_right_bold),
-                    Paragraph("<b>Canceladas (Auditoria)</b>", cell_right_bold),
-                    Paragraph("<b>Status</b>", cell_center)
-                ]
-            ]
-
-            tot_nfe_s = Decimal("0.00")
-            tot_nfce_s = Decimal("0.00")
-
-            for idx, emp in enumerate(empresas, start=1):
-                tot_nfe_s += emp.nfe_saidas_val
-                tot_nfce_s += emp.nfce_saidas_val
-
-                table_auditoria.append([
-                    Paragraph(str(idx), cell_center),
-                    Paragraph(emp.razao_social, cell_norm),
-                    Paragraph(_format_moeda(emp.nfe_saidas_val), cell_right),
-                    Paragraph(_format_moeda(emp.nfce_saidas_val), cell_right),
-                    Paragraph(_format_moeda(emp.total_canceladas_val), cell_right),
-                    Paragraph(emp.status, cell_center)
-                ])
-
-            table_auditoria.append([
-                Paragraph("", cell_center),
-                Paragraph("<b>TOTAL</b>", cell_bold),
-                Paragraph(f"<b>{_format_moeda(tot_nfe_s)}</b>", cell_right_bold),
-                Paragraph(f"<b>{_format_moeda(tot_nfce_s)}</b>", cell_right_bold),
-                Paragraph(f"<b>{_format_moeda(tot_canc)}</b>", cell_right_bold),
-                Paragraph("", cell_center)
-            ])
-
-            t_aud = Table(table_auditoria, colWidths=[30, 250, 120, 120, 140, 100])
-            t_aud.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#475569")),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -2), [colors.white, colors.HexColor("#F8FAFC")]),
-                ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor("#E2E8F0")),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-            ]))
-            elements.append(t_aud)
 
             doc.build(elements)
             logger.info(f"Relatório PDF Consolidado do Lote gerado: {destino_caminho.name}")
