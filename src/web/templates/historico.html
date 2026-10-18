@@ -303,6 +303,8 @@
                     statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">✓ Concluído</span>';
                 } else if (emp.status === 'EM_ANDAMENTO') {
                     statusBadge = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full animate-pulse">Em Andamento</span>';
+                } else if (emp.status === 'ERRO_PARCIAL') {
+                    statusBadge = '<span class="px-2 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-bold rounded-full">Erro Parcial</span>';
                 } else if (emp.status === 'ERRO') {
                     statusBadge = '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 text-[10px] font-bold rounded-full">Erro</span>';
                 } else {

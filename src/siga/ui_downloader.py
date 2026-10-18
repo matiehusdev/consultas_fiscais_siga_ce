@@ -24,7 +24,7 @@ class SigaUiDownloader:
     def __init__(self, base_url: Optional[str] = None):
         self.base_url = (base_url or settings.siga_base_url).rstrip("/")
         self.polling_interval = 2.0
-        self.max_attempts = 45  # até ~90 segundos aguardando o processamento assíncrono
+        self.max_attempts = 150  # até ~300 segundos aguardando o processamento assíncrono (essencial para NFC-e pesados)
 
     def solicitar_e_baixar(
         self,
@@ -224,10 +224,14 @@ class SigaUiDownloader:
                         if ("NF-E" not in row_text and "NFE" not in row_text) or "NFC" in row_text:
                             continue
 
-                    # Checa visão se informada na linha
-                    if "EMISSOR" in row_text or "DESTINAT" in row_text:
-                        if visao_esperada not in row_text:
-                            continue
+                    # Checa visão se informada na linha (com suporte a EMISSOR/DESTINATÁRIO e SAÍDAS/ENTRADAS)
+                    if any(k in row_text for k in ["EMISSOR", "DESTINAT", "SAÍDA", "SAIDA", "ENTRADA"]):
+                        if op_upper == "SAIDA":
+                            if "DESTINAT" in row_text or "ENTRADA" in row_text:
+                                continue
+                        else:  # ENTRADA
+                            if "EMISSOR" in row_text or "SAÍDA" in row_text or "SAIDA" in row_text:
+                                continue
 
                     # Encontrou a linha mais recente correspondente
                     matching_row = row

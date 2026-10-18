@@ -155,3 +155,62 @@ def test_ui_downloader_error_status_from_sefaz(tmp_path):
     assert sucesso is False
     assert "status ERRO" in err
     assert not destino.exists()
+
+def test_ui_downloader_distinguishes_saida_and_entrada(tmp_path):
+    downloader = SigaUiDownloader()
+    downloader.polling_interval = 0
+    downloader.max_attempts = 1
+
+    mock_session = MagicMock(spec=BrowserSession)
+    mock_session.is_alive = True
+    mock_page = MagicMock()
+    mock_session.page = mock_page
+
+    mock_btn_baixar = MagicMock(is_visible=MagicMock(return_value=True))
+
+    # Linha 1 é ENTRADA, Linha 2 é SAÍDA (Emissor)
+    row_entrada = MagicMock()
+    row_entrada.is_visible.return_value = True
+    row_entrada.text_content.return_value = "NF-e - Indicadores - 2026 | Visão: DESTINATÁRIO | Concluído"
+
+    row_saida = MagicMock()
+    row_saida.is_visible.return_value = True
+    row_saida.text_content.return_value = "NF-e - Indicadores - 2026 | Visão: EMISSOR | Concluído"
+
+    mock_dl_btn = MagicMock(is_visible=MagicMock(return_value=True))
+    row_saida.locator.return_value.first = mock_dl_btn
+    row_saida.locator.return_value.last = mock_dl_btn
+
+    def locator_side_effect(selector, *args, **kwargs):
+        loc = MagicMock()
+        if "Baixar Tabela" in selector:
+            loc.first = mock_btn_baixar
+        elif "table tbody tr" in selector:
+            loc.count.return_value = 2
+            loc.nth.side_effect = lambda i: row_entrada if i == 0 else row_saida
+            loc.first = row_entrada
+        else:
+            loc.first = MagicMock(is_visible=MagicMock(return_value=False))
+        return loc
+
+    mock_page.locator.side_effect = locator_side_effect
+    mock_download_obj = MagicMock()
+    mock_download_obj.save_as.side_effect = lambda p: Path(p).write_bytes(b"PK0304MockSaidaContent")
+    mock_context_manager = MagicMock()
+    mock_context_manager.__enter__.return_value = MagicMock(value=mock_download_obj)
+    mock_page.expect_download.return_value = mock_context_manager
+
+    destino = tmp_path / "nfe_saida.xlsx"
+    sucesso, sha256, tamanho, err = downloader.solicitar_e_baixar(
+        session=mock_session,
+        cnpj="63330299000162",
+        tipo_doc="NFE",
+        operacao="SAIDA",
+        ano=2026,
+        destino_caminho=destino
+    )
+
+    assert sucesso is True
+    assert destino.exists()
+    assert destino.read_bytes() == b"PK0304MockSaidaContent"
+

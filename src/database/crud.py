@@ -354,7 +354,7 @@ def reset_consulta_for_retry(db: Session, consulta_id: int, only_errors: bool = 
 
     for item in consulta.empresas_consulta:
         if only_errors:
-            if item.status in ("ERRO", "PENDENTE"):
+            if item.status in ("ERRO", "ERRO_PARCIAL", "PENDENTE"):
                 item.status = "PENDENTE"
                 item.erro_mensagem = None
                 item.iniciado_em = None
@@ -366,7 +366,7 @@ def reset_consulta_for_retry(db: Session, consulta_id: int, only_errors: bool = 
             item.finalizado_em = None
 
     sucesso_count = sum(1 for it in consulta.empresas_consulta if it.status == "CONCLUIDO")
-    erro_count = sum(1 for it in consulta.empresas_consulta if it.status == "ERRO")
+    erro_count = sum(1 for it in consulta.empresas_consulta if it.status in ("ERRO", "ERRO_PARCIAL"))
     consulta.sucesso_empresas = sucesso_count
     consulta.erro_empresas = erro_count
 

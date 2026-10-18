@@ -55,6 +55,66 @@ def test_contribuinte_selector_clicks_element():
     assert resultado is True
     assert mock_locator.click.called
 
+def test_contribuinte_selector_rejects_missing_company_in_table():
+    selector = ContribuinteSelector()
+    mock_session = MagicMock(spec=BrowserSession)
+    mock_page = MagicMock()
+    mock_page.url = "https://siga.sefaz.ce.gov.br/unidades"
+
+    # Simula que a tabela de unidades está visível, mas os seletores da empresa esperada não são encontrados
+    def locator_side_effect(selector_str, *args, **kwargs):
+        loc = MagicMock()
+        if "tabela" in selector_str or "unidades" in selector_str:
+            loc.first = MagicMock(is_visible=MagicMock(return_value=True))
+        else:
+            loc.first = MagicMock(is_visible=MagicMock(return_value=False))
+        return loc
+
+    mock_page.locator.side_effect = locator_side_effect
+    mock_session.page = mock_page
+
+    resultado = selector.selecionar_contribuinte(
+        session=mock_session,
+        cnpj="12.720.599/0001-17",
+        razao_social="H E BOTELHO OLIVEIRA"
+    )
+    # Não deve selecionar cegamente uma linha qualquer se a empresa não existir na lista
+    assert resultado is False
+
+def test_contribuinte_selector_matches_by_razao_social():
+    selector = ContribuinteSelector()
+    mock_session = MagicMock(spec=BrowserSession)
+    mock_page = MagicMock()
+    mock_page.url = "https://siga.sefaz.ce.gov.br/unidades"
+
+    mock_row = MagicMock()
+    mock_row.is_visible.return_value = True
+    mock_ok_btn = MagicMock(is_visible=MagicMock(return_value=True))
+
+    def locator_side_effect(selector_str, *args, **kwargs):
+        loc = MagicMock()
+        if "H E BOTELHO OLIVEIRA" in selector_str:
+            loc.first = mock_row
+        elif "Ok" in selector_str:
+            loc.last = mock_ok_btn
+            loc.first = mock_ok_btn
+        else:
+            loc.first = MagicMock(is_visible=MagicMock(return_value=False))
+        return loc
+
+    mock_page.locator.side_effect = locator_side_effect
+    mock_session.page = mock_page
+
+    resultado = selector.selecionar_contribuinte(
+        session=mock_session,
+        cnpj="12.720.599/0001-17",
+        razao_social="H E BOTELHO OLIVEIRA"
+    )
+    assert resultado is True
+    assert mock_row.click.called
+
+
+
 def test_nfe_client_solicitar_download_success():
     client = NFeClient()
     mock_session = MagicMock(spec=BrowserSession)

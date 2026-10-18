@@ -387,8 +387,10 @@ def _processar_documentos_empresa(
         except Exception as e:
             logger.error(f"Erro ao processar relatórios para {razao}: {e}")
 
-    if concluidas > 0:
+    if concluidas == total_tarefas and total_tarefas > 0:
         return True, ""
+    elif concluidas > 0 and erros:
+        return False, f"Parcial ({concluidas}/{total_tarefas}): " + " | ".join(erros[:2])
     elif erros:
         return False, " | ".join(erros[:2])
     else:
@@ -697,7 +699,7 @@ def run_consulta_batch(consulta_id: int):
                         item.status = "CONCLUIDO"
                         sucesso_count += 1
                     else:
-                        item.status = "ERRO"
+                        item.status = "ERRO_PARCIAL" if "Parcial" in erro_msg else "ERRO"
                         item.erro_mensagem = erro_msg
                         erro_count += 1
                     db.commit()
