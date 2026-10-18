@@ -1,9 +1,14 @@
 import os
+import sys
 from pathlib import Path
 from pydantic import BaseModel, Field
 
-# Diretório raiz do projeto (siga_fiscal)
-BASE_DIR = Path(__file__).resolve().parent.parent
+# Diretório raiz do projeto (suporta execução direta ou executável compilado)
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 def _load_env_file(env_path: Path):
     """Carregador simples de variáveis .env sem dependências extras."""

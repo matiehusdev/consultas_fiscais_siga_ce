@@ -62,3 +62,9 @@ logs/
 Thumbs.db
 .vscode/
 .idea/
+
+# PyInstaller & Executáveis compilados
+build/
+dist/
+*.spec
+*.exe
