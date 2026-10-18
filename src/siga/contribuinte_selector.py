@@ -93,10 +93,14 @@ class ContribuinteSelector:
                     if ok_btn.is_visible(timeout=2000):
                         logger.info("Confirmando seleção no botão 'Ok'...")
                         ok_btn.click()
-                        time.sleep(2.5)
                     else:
                         row.dblclick(force=True)
-                        time.sleep(2.5)
+
+                    try:
+                        page.wait_for_load_state("networkidle", timeout=3000)
+                    except Exception:
+                        pass
+                    time.sleep(2.5)
 
                     linha_selecionada = True
                     break
@@ -122,6 +126,11 @@ class ContribuinteSelector:
                                     ok_btn.click()
                                 else:
                                     row.dblclick(force=True)
+
+                                try:
+                                    page.wait_for_load_state("networkidle", timeout=3000)
+                                except Exception:
+                                    pass
                                 time.sleep(2.5)
                                 linha_selecionada = True
                                 break

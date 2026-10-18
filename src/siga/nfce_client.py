@@ -52,30 +52,38 @@ class NFCeClient:
         if token:
             headers["Authorization"] = token
 
-        logger.info(f"Solicitando download de NFC-e ({operacao_upper}) para CNPJ {clean}...")
+        for attempt in range(1, 3):
+            try:
+                token = session.get_auth_token() if hasattr(session, "get_auth_token") else getattr(session, "auth_token", None)
+                if token:
+                    headers["Authorization"] = token
 
-        try:
-            response = session.context.request.post(
-                url,
-                data=payload,
-                headers=headers
-            )
+                response = session.context.request.post(
+                    url,
+                    data=payload,
+                    headers=headers
+                )
 
-            if response.status in (200, 201, 202):
-                logger.info(f"Solicitação de NFC-e ({operacao_upper}) aceita com sucesso (HTTP {response.status}).")
-                return True, "Solicitação aceita", None
-            elif response.status == 409:
-                logger.info(f"Solicitação de NFC-e ({operacao_upper}) já existente na SEFAZ (HTTP 409). Prosseguindo para acompanhamento e download.")
-                return True, "Solicitação já existente", None
-            else:
-                err_text = sanitize_text(response.text()[:200])
-                logger.warning(f"Resposta na solicitação de NFC-e: HTTP {response.status} - {err_text}")
-                return False, None, f"HTTP {response.status}: {err_text}"
+                if response.status in (200, 201, 202):
+                    logger.info(f"Solicitação de NFC-e ({operacao_upper}) aceita com sucesso (HTTP {response.status}).")
+                    return True, "Solicitação aceita", None
+                elif response.status == 409:
+                    logger.info(f"Solicitação de NFC-e ({operacao_upper}) já existente na SEFAZ (HTTP 409). Prosseguindo para acompanhamento e download.")
+                    return True, "Solicitação já existente", None
+                elif response.status == 403 and attempt < 2:
+                    logger.warning(f"Tentativa {attempt}: Resposta HTTP 403 da SEFAZ em NFC-e (transição de unidade/sessão). Aguardando 4s para revalidar...")
+                    time.sleep(4.0)
+                    continue
+                else:
+                    err_text = sanitize_text(response.text()[:200])
+                    logger.warning(f"Resposta na solicitação de NFC-e: HTTP {response.status} - {err_text}")
+                    return False, None, f"HTTP {response.status}: {err_text}"
 
-        except Exception as e:
-            err = f"Erro na solicitação de NFC-e: {sanitize_text(str(e))}"
-            logger.error(err)
-            return False, None, err
+            except Exception as e:
+                err = f"Erro na solicitação de NFC-e: {sanitize_text(str(e))}"
+                logger.error(err)
+                return False, None, err
+        return False, None, "Falha na solicitação de NFC-e após tentativas."
 
     def acompanhar_solicitacao(
         self,
