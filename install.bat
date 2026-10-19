@@ -1,11 +1,13 @@
 @echo off
 chcp 65001 >nul
+title Instalador — Giro Empresarial
 echo ========================================================
-echo        INSTALAÇÃO DO SISTEMA SIGA FISCAL (SEFAZ-CE)
+echo               GIRO EMPRESARIAL
+echo      Instalação e Configuração Automática SEFAZ-CE
 echo ========================================================
-
 echo.
-echo [1/4] Verificando versão do Python...
+
+echo [1/3] Verificando versão do Python...
 python --version
 if errorlevel 1 (
     echo [ERRO] Python não foi encontrado no PATH. Instale o Python 3.11+ e tente novamente.
@@ -14,34 +16,23 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/4] Instalando dependências do projeto (requirements.txt)...
-pip install -r requirements.txt
+echo [2/3] Instalando dependências e componentes do sistema...
+python -m pip install -r requirements.txt --quiet
 if errorlevel 1 (
-    echo [ERRO] Falha ao instalar dependências.
-    pause
-    exit /b 1
+    echo [AVISO] Tentando instalar pacotes diretamente...
+    pip install -r requirements.txt
 )
 
 echo.
-echo [3/4] Instalando binários do navegador Playwright (Chromium)...
-python -m playwright install chromium
-
-echo.
-echo [4/4] Verificando arquivo de configuração (.env)...
-if not exist .env (
-    copy .env.example .env
-    echo Arquivo .env criado a partir de .env.example.
-) else (
-    echo Arquivo .env já existente mantido.
-)
-
-echo.
-echo Inicializando banco de dados...
-python -c "from src.database.connection import init_db; init_db(); print('Banco de dados SQLite inicializado com sucesso!')"
+echo [3/3] Executando configuração do ambiente, banco de dados e atalhos...
+python src/bootstrap.py
 
 echo.
 echo ========================================================
-echo   Instalação concluída com sucesso!
-echo   Execute 'run.bat' para iniciar a aplicação.
+echo   Configuração concluída com sucesso!
+echo   O atalho 'Giro Empresarial' foi criado na Área de
+echo   Trabalho e no Menu Iniciar (Pesquisar do Windows).
+echo   Execute 'run.bat' ou dê clique duplo no atalho.
 echo ========================================================
 pause
+
