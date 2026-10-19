@@ -32,25 +32,62 @@ Sistema automatizado de alta performance e confiabilidade em Python para consult
 
 ---
 
-## 🛠️ Instalação e Execução
+## 📥 Como Baixar (Download)
 
-### Pré-requisitos
+### 1. O que você precisa ter instalado na máquina
+Antes de abrir o programa, certifique-se de que a máquina possui:
 - **Windows 10 ou 11 (64 bits)**
-- **Python 3.11 ou superior**
-- **Certificado Digital A1** válido (instalado no Windows ou configurado no painel da aplicação).
+- **Python 3.11 ou superior**:
+  - Baixe no site oficial: [python.org/downloads](https://www.python.org/downloads/)
+  - > [!IMPORTANT]
+    > Na primeira tela do instalador do Python, **marque obrigatoriamente a opção:**  
+    > ☑️ **"Add python.exe to PATH"** (Adicionar Python ao PATH).
+- **Certificado Digital A1** da empresa ou do escritório de contabilidade (instalado no Windows ou arquivo `.pfx`).
 
 ---
 
-### Opção 1: Execução Direta / Desktop (Recomendada)
+### 2. Passo a passo para baixar o Giro Empresarial
 
-Se você já possui o repositório ou recebeu o pacote da aplicação:
+Você tem duas formas de baixar:
 
-1. Dê um **clique duplo** em **`Giro Empresarial.exe`** (ou no atalho da Área de Trabalho / Menu Iniciar).
-2. Na **primeira abertura**, o sistema executa o *Auto-Setup* (prepara o banco de dados, verifica componentes e cria os atalhos com ícone no Menu Iniciar e Desktop).
-3. O servidor web iniciará e seu navegador padrão abrirá automaticamente em **[http://127.0.0.1:8000](http://127.0.0.1:8000)**.
+#### Opção A: Download Direto em Arquivo ZIP (Mais Simples)
+1. Acesse a página do projeto no GitHub: **[consultas_fiscais_siga_ce](https://github.com/matiehusdev/consultas_fiscais_siga_ce)**.
+2. Clique no botão verde **`Code` ▾** (localizado no canto superior direito).
+3. Clique em **`Download ZIP`** (ou baixe diretamente por [este link](https://github.com/matiehusdev/consultas_fiscais_siga_ce/archive/refs/heads/main.zip)).
+4. Após o download, clique com o botão direito no arquivo baixado (`consultas_fiscais_siga_ce-main.zip`) e selecione **"Extrair Tudo..."** para uma pasta do seu computador (por exemplo: `C:\Giro Empresarial` ou em `Documentos`).
+
+#### Opção B: Via Git (Para Desenvolvedores)
+```bash
+git clone https://github.com/matiehusdev/consultas_fiscais_siga_ce.git
+cd consultas_fiscais_siga_ce
+```
+
+---
+
+### 3. O que vem no pacote baixado
+Ao extrair o pacote, você terá:
+- **`Giro Empresarial.exe`:** Executável principal para iniciar o sistema com clique duplo.
+- **`installer.py`:** Assistente gráfico de instalação e verificação rápida.
+- **`run.bat` e `install.bat`:** Scripts em lote alternativos para inicialização rápida via prompt.
+- **Estrutura completa da aplicação:** Código-fonte seguro, pastas de dados locais e ícones da marca.
+
+---
+
+## 🛠️ Como Iniciar a Aplicação
+
+### Opção 1: Inicialização Rápida Desktop (Recomendada)
+
+1. Entre na pasta extraída e dê um **clique duplo** em **`Giro Empresarial.exe`**.
+2. **Na primeira abertura**, o sistema roda o **Auto-Setup** automaticamente:
+   - Instala as bibliotecas necessárias.
+   - Configura o navegador Chromium do Playwright para automação SEFAZ.
+   - Inicializa o banco de dados SQLite local.
+   - **Cria automaticamente o atalho oficial com a logo na Área de Trabalho e no Menu Iniciar**.
+3. O servidor web inicia e o seu **navegador padrão abre sozinho** no endereço:  
+   👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
 > [!TIP]
-> Você também pode abrir a aplicação a qualquer momento pressionando a tecla `Windows` e digitando **"Giro Empresarial"**.
+> Após a primeira abertura, você nunca mais precisa procurar a pasta: basta pressionar a tecla `Windows` no teclado, digitar **"Giro Empresarial"** e apertar `Enter`, ou clicar no atalho da sua Área de Trabalho!
 
 ---
 

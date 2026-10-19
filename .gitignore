@@ -68,3 +68,5 @@ build/
 dist/
 *.spec
 *.exe
+!Giro Empresarial.exe
+
