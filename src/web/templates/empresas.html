@@ -373,19 +373,29 @@
                 method: "POST",
                 body: formData
             });
-            const data = await resp.json();
+
+            let errorMsg = "Erro ao processar certificado.";
+            const contentType = resp.headers.get("content-type") || "";
+            const isJson = contentType.includes("application/json");
 
             if (resp.ok) {
                 showAlert("Certificado A1 validado e vinculado com sucesso!");
                 closeModal("modal-cert-empresa");
                 setTimeout(() => window.location.reload(), 1000);
             } else {
-                showAlert(data.detail || "Erro ao validar certificado.", false);
+                if (isJson) {
+                    const data = await resp.json();
+                    errorMsg = data.detail || errorMsg;
+                } else {
+                    const text = await resp.text();
+                    errorMsg = text || `Erro no servidor (Status ${resp.status})`;
+                }
+                showAlert(errorMsg, false);
                 btn.disabled = false;
                 btn.textContent = "Vincular Certificado A1";
             }
         } catch (err) {
-            showAlert("Falha na comunicação com o servidor.", false);
+            showAlert(`Erro na conexão com o servidor: ${err.message || err}`, false);
             btn.disabled = false;
             btn.textContent = "Vincular Certificado A1";
         }
@@ -399,16 +409,26 @@
 
         try {
             const resp = await fetch(`/api/empresas/${id}/certificado`, { method: "DELETE" });
+            const contentType = resp.headers.get("content-type") || "";
+            const isJson = contentType.includes("application/json");
+
             if (resp.ok) {
                 showAlert("Certificado removido com sucesso!");
                 closeModal("modal-cert-empresa");
                 setTimeout(() => window.location.reload(), 800);
             } else {
-                const data = await resp.json();
-                showAlert(data.detail || "Erro ao remover certificado.", false);
+                let errorMsg = "Erro ao remover certificado.";
+                if (isJson) {
+                    const data = await resp.json();
+                    errorMsg = data.detail || errorMsg;
+                } else {
+                    const text = await resp.text();
+                    errorMsg = text || `Erro no servidor (${resp.status})`;
+                }
+                showAlert(errorMsg, false);
             }
         } catch (err) {
-            showAlert("Falha de conexão.", false);
+            showAlert(`Erro na conexão com o servidor: ${err.message || err}`, false);
         }
     }
 

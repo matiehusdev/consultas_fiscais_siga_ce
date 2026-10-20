@@ -26,6 +26,13 @@ Este documento reúne diagnósticos, causas raízes e soluções para os cenári
   1. Verifique se o portal `https://siga.sefaz.ce.gov.br/` abre normalmente no seu navegador de uso diário (Google Chrome ou Edge).
   2. Ajuste o parâmetro `CERTIFICATE_SELECTION_TIMEOUT_SECONDS` no arquivo `.env` para um valor maior (ex: `180` ou `240`) se a SEFAZ estiver com latência elevada.
 
+### 1.4 Erro ao anexar ou vincular o Certificado Digital A1 (.pfx/.p12) na tela Empresas
+- **Causa:** O ambiente Python da máquina pode não ter a biblioteca `python-multipart` instalada (necessária para upload de formulários e arquivos no FastAPI), ou a senha informada para o certificado está incorreta.
+- **Solução:**
+  1. O sistema inclui auto-recuperação automática. Execute o script `install.bat` na pasta do programa para garantir que todas as dependências estejam instaladas.
+  2. Se preferir pelo terminal, execute: `pip install python-multipart`.
+  3. Certifique-se de preencher a senha correta do arquivo `.pfx` no modal de vinculação. O sistema informa exatamente na tela se a senha for inválida ou se o arquivo estiver expirado.
+
 ---
 
 ## 2. Sessão e Contribuinte no SIGA

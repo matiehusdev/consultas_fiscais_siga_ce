@@ -186,7 +186,11 @@ def save_empresa_certificado(
     with open(cert_path, "wb") as f:
         f.write(pfx_to_save)
 
-    empresa.certificado_caminho = str(cert_path.relative_to(settings.base_dir))
+    try:
+        empresa.certificado_caminho = str(cert_path.resolve().relative_to(settings.base_dir.resolve()))
+    except Exception:
+        import os
+        empresa.certificado_caminho = os.path.relpath(str(cert_path), str(settings.base_dir))
     empresa.certificado_senha_hash = encrypt_passphrase(passphrase)
     empresa.certificado_nome = filename
     empresa.certificado_validade = metadata.get("validade")

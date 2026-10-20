@@ -60,12 +60,14 @@ def check_and_install_packages(on_progress: Optional[Callable[[str], None]] = No
     try:
         import fastapi
         import uvicorn
+        import jinja2
         import playwright
         import openpyxl
         import reportlab
         import pandas
         import sqlalchemy
         import cryptography
+        import multipart
         return True
     except ImportError as e:
         log_msg(f"Dependência ausente detectada ({e}). Instalando pacotes necessários...")
@@ -75,7 +77,12 @@ def check_and_install_packages(on_progress: Optional[Callable[[str], None]] = No
         if req_file.exists():
             cmd = [get_python_executable(), "-m", "pip", "install", "-r", str(req_file), "--quiet"]
             res = subprocess.run(cmd, capture_output=True, text=True)
-            return res.returncode == 0
+            if res.returncode != 0:
+                # Tenta novamente sem --quiet para registrar detalhes
+                cmd_retry = [get_python_executable(), "-m", "pip", "install", "-r", str(req_file)]
+                res_retry = subprocess.run(cmd_retry, capture_output=True, text=True)
+                return res_retry.returncode == 0
+            return True
         return False
 
 def check_and_install_playwright(on_progress: Optional[Callable[[str], None]] = None) -> bool:
@@ -195,20 +202,22 @@ def check_and_setup_environment(on_progress: Optional[Callable[[str], None]] = N
 def run_first_time_setup(on_progress: Optional[Callable[[str], None]] = None) -> bool:
     """
     Executa a rotina completa de instalação e configuração na primeira abertura.
-    Cria a marcação data/.bootstrap_completed para evitar repetição nas aberturas seguintes.
+    Garante que pacotes essenciais e Chromium estejam presentes mesmo se o diretório
+    for copiado entre máquinas com o arquivo .bootstrap_completed já existente.
     """
+    # 1. Verificação rápida de pacotes essenciais (execução instantânea se já instalados)
+    check_and_install_packages(on_progress)
+    check_and_setup_environment(on_progress)
+
     flag_file = BASE_DIR / "data" / ".bootstrap_completed"
-    if flag_file.exists():
-        # Atalhos do sistema podem ser verificados rapidamente
+    if flag_file.exists() and is_chromium_installed():
         return True
 
-    log_msg("Iniciando rotina de primeira abertura (Auto-Setup)...")
+    log_msg("Iniciando rotina de configuração inicial (Auto-Setup)...")
     if on_progress:
         on_progress("Iniciando configuração inicial do Giro Empresarial...")
 
-    check_and_install_packages(on_progress)
     check_and_install_playwright(on_progress)
-    check_and_setup_environment(on_progress)
 
     if on_progress:
         on_progress("Criando atalho de inicialização no Menu Iniciar e Área de Trabalho...")
@@ -217,7 +226,7 @@ def run_first_time_setup(on_progress: Optional[Callable[[str], None]] = None) ->
     try:
         flag_file.parent.mkdir(parents=True, exist_ok=True)
         flag_file.write_text(f"installed_at={time.time()}\nversion=1.0.0\n", encoding="utf-8")
-        log_msg("Primeira abertura concluída com êxito! Marcador salvo em data/.bootstrap_completed.")
+        log_msg("Configuração concluída com êxito! Marcador salvo em data/.bootstrap_completed.")
     except Exception:
         pass
 

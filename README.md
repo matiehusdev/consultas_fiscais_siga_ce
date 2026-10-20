@@ -14,7 +14,9 @@ Sistema automatizado de alta performance e confiabilidade em Python para consult
 > **POLÍTICA DE PRIVACIDADE E CERTIFICADOS LOCAIS:**
 > - **NENHUM certificado digital, arquivo `.pfx`, `.p12`, chave privada ou senha é versionado neste repositório.**
 > - O arquivo `.gitignore` bloqueia estritamente quaisquer chaves, certificados, credenciais locais (`.env`), dados de bancos SQLite locais e relatórios de clientes.
-> - **Cada usuário/máquina deve configurar seus próprios certificados digitais A1 localmente** (instalado no repositório de certificados do Windows ou cadastrado via interface web em ambiente seguro).
+> - **Cada usuário/máquina deve configurar seus próprios certificados digitais A1 localmente:**
+>   - **Vinculação direta via Web (.pfx / .p12):** Você pode anexar o arquivo do Certificado A1 diretamente no cadastro da empresa na tela **Empresas** informando a senha. O sistema valida os dados do titular em tempo de execução, moderniza a criptografia para compatibilidade com o navegador (AES-256) e protege a senha em repouso com chave simétrica local.
+>   - **Repositório nativo do Windows:** Alternativamente, o certificado A1 pode ser instalado no repositório de certificados do Windows (`certmgr.msc`) para seleção interativa durante a consulta.
 
 ---
 

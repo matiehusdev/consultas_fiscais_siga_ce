@@ -4,7 +4,8 @@ from cryptography.fernet import Fernet
 from src.config import settings
 from src.utils.logger import logger
 
-_KEY_FILE = settings.data_dir / ".secret_key"
+def _get_key_file() -> Path:
+    return settings.data_dir / ".secret_key"
 
 def _get_or_create_key() -> bytes:
     """Obtém ou gera chave local mestra para cifragem de senhas em repouso."""
@@ -13,15 +14,25 @@ def _get_or_create_key() -> bytes:
     if env_key:
         return env_key.encode("utf-8")
 
-    if _KEY_FILE.exists():
-        with open(_KEY_FILE, "rb") as f:
-            return f.read().strip()
+    key_file = _get_key_file()
+    if key_file.exists():
+        try:
+            with open(key_file, "rb") as f:
+                content = f.read().strip()
+                if content:
+                    return content
+        except Exception as e:
+            logger.warning(f"Erro ao ler chave mestra de {key_file}: {e}")
 
     # Gera nova chave de 32 bytes compatível com Fernet
     new_key = Fernet.generate_key()
-    with open(_KEY_FILE, "wb") as f:
-        f.write(new_key)
-    logger.info("Nova chave criptográfica local gerada para proteção de certificados.")
+    try:
+        key_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(key_file, "wb") as f:
+            f.write(new_key)
+        logger.info("Nova chave criptográfica local gerada para proteção de certificados.")
+    except Exception as e:
+        logger.error(f"Erro ao salvar arquivo de chave mestra {key_file}: {e}")
     return new_key
 
 def encrypt_passphrase(plain_text: str) -> str:

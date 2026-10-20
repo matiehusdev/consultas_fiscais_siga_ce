@@ -45,6 +45,23 @@ templates = Jinja2Templates(directory=str(settings.base_dir / "src" / "web" / "t
 # Monta pasta static
 app.mount("/static", StaticFiles(directory=str(settings.base_dir / "src" / "web" / "static")), name="static")
 
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    if isinstance(exc, StarletteHTTPException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    logger.exception(f"Erro não tratado na rota {request.url.path}: {exc}")
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Erro interno no servidor: {str(exc)}"}
+        )
+    return HTMLResponse(
+        status_code=500,
+        content=f"<h3>Erro Interno</h3><p>{str(exc)}</p>"
+    )
+
 # ============================================================
 # SCHEMAS PYDANTIC
 # ============================================================
@@ -427,29 +444,66 @@ async def api_upload_empresa_certificado(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    from fastapi import UploadFile, File
-    form = await request.form()
+    from fastapi import UploadFile
+    try:
+        form = await request.form()
+    except RuntimeError as e:
+        err_str = str(e).lower()
+        if "multipart" in err_str:
+            logger.warning("Biblioteca 'python-multipart' ausente detectada ao receber certificado. Tentando auto-instalação...")
+            import subprocess
+            from src.bootstrap import get_python_executable
+            try:
+                subprocess.run([get_python_executable(), "-m", "pip", "install", "python-multipart"], capture_output=True, text=True)
+                form = await request.form()
+            except Exception:
+                raise HTTPException(
+                    status_code=500,
+                    detail="A biblioteca 'python-multipart' não está instalada no ambiente Python desta máquina. Execute 'pip install python-multipart' no terminal ou execute o 'install.bat'."
+                )
+        else:
+            raise HTTPException(status_code=400, detail=f"Erro ao processar formulário: {e}")
+    except Exception as e:
+        logger.error(f"Erro ao ler formulário de certificado: {e}")
+        raise HTTPException(status_code=400, detail=f"Erro ao processar dados enviados: {e}")
+
     file: Optional[UploadFile] = form.get("certificado")
-    senha: str = str(form.get("senha") or "")
+    senha: str = str(form.get("senha") or "").strip()
 
     if not file:
         raise HTTPException(status_code=400, detail="Nenhum arquivo de certificado (.pfx/.p12) enviado.")
     if not senha:
         raise HTTPException(status_code=400, detail="A senha do certificado é obrigatória.")
 
-    pfx_data = await file.read()
-    success, err = crud.save_empresa_certificado(
-        db,
-        empresa_id=empresa_id,
-        pfx_data=pfx_data,
-        filename=file.filename or "certificado.pfx",
-        passphrase=senha
-    )
-    if not success:
-        raise HTTPException(status_code=400, detail=err)
+    try:
+        pfx_data = await file.read()
+    except Exception as e:
+        logger.error(f"Erro ao ler bytes do arquivo de certificado: {e}")
+        raise HTTPException(status_code=400, detail=f"Falha ao ler o arquivo enviado: {e}")
 
-    empresa = crud.get_empresa_by_id(db, empresa_id)
-    return empresa.to_dict()
+    if not pfx_data:
+        raise HTTPException(status_code=400, detail="O arquivo de certificado enviado está vazio.")
+
+    try:
+        success, err = crud.save_empresa_certificado(
+            db,
+            empresa_id=empresa_id,
+            pfx_data=pfx_data,
+            filename=file.filename or "certificado.pfx",
+            passphrase=senha
+        )
+        if not success:
+            raise HTTPException(status_code=400, detail=err)
+
+        empresa = crud.get_empresa_by_id(db, empresa_id)
+        if not empresa:
+            raise HTTPException(status_code=404, detail="Empresa não encontrada.")
+        return empresa.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Erro interno ao salvar certificado da empresa {empresa_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao vincular certificado: {str(e)}")
 
 @app.delete("/api/empresas/{empresa_id}/certificado")
 def api_delete_empresa_certificado(empresa_id: int, db: Session = Depends(get_db)):
