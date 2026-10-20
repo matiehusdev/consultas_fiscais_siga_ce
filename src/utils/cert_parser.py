@@ -1,9 +1,13 @@
 from datetime import datetime, timezone
 from typing import Tuple, Optional, Dict, Any
+import re
+
+from src.utils.deps import ensure_cryptography
+ensure_cryptography()
+
 from cryptography.hazmat.primitives.serialization import pkcs12, BestAvailableEncryption
 from cryptography import x509
 from cryptography.x509.oid import NameOID
-import re
 
 from src.utils.cnpj_validator import clean_cnpj
 from src.utils.logger import logger

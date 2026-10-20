@@ -1,8 +1,11 @@
 import os
 from pathlib import Path
-from cryptography.fernet import Fernet
 from src.config import settings
 from src.utils.logger import logger
+from src.utils.deps import ensure_cryptography
+
+ensure_cryptography()
+from cryptography.fernet import Fernet
 
 def _get_key_file() -> Path:
     return settings.data_dir / ".secret_key"
