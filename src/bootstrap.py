@@ -74,6 +74,7 @@ def check_and_install_packages(on_progress: Optional[Callable[[str], None]] = No
         if on_progress:
             on_progress("Instalando dependências do sistema...")
         req_file = BASE_DIR / "requirements.txt"
+        success = True
         if req_file.exists():
             cmd = [get_python_executable(), "-m", "pip", "install", "-r", str(req_file), "--quiet"]
             res = subprocess.run(cmd, capture_output=True, text=True)
@@ -81,9 +82,19 @@ def check_and_install_packages(on_progress: Optional[Callable[[str], None]] = No
                 # Tenta novamente sem --quiet para registrar detalhes
                 cmd_retry = [get_python_executable(), "-m", "pip", "install", "-r", str(req_file)]
                 res_retry = subprocess.run(cmd_retry, capture_output=True, text=True)
-                return res_retry.returncode == 0
-            return True
-        return False
+                success = (res_retry.returncode == 0)
+
+        # Garante explicitamente a presença da biblioteca cryptography
+        try:
+            import cryptography
+        except ImportError:
+            log_msg("Instalando biblioteca cryptography diretamente...")
+            cmd_crypto = [get_python_executable(), "-m", "pip", "install", "cryptography>=42.0.0"]
+            res_crypto = subprocess.run(cmd_crypto, capture_output=True, text=True)
+            if res_crypto.returncode != 0:
+                success = False
+
+        return success
 
 def check_and_install_playwright(on_progress: Optional[Callable[[str], None]] = None) -> bool:
     """Verifica e instala os binários do Chromium do Playwright se necessário."""
