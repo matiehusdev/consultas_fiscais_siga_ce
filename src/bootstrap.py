@@ -15,6 +15,13 @@ else:
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+def set_base_dir(new_base_dir: Path):
+    """Atualiza o diretório base da aplicação dinamicamente."""
+    global BASE_DIR
+    BASE_DIR = Path(new_base_dir).resolve()
+    if str(BASE_DIR) not in sys.path:
+        sys.path.insert(0, str(BASE_DIR))
+
 def log_msg(msg: str):
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] [BOOTSTRAP] {msg}")
@@ -27,10 +34,24 @@ def get_python_executable() -> str:
     if py:
         return py
     userprofile = os.environ.get("USERPROFILE", "")
-    for p in Path(userprofile).glob("AppData/Local/Programs/Python/Python*/python.exe"):
+    if userprofile:
+        for p in Path(userprofile).glob("AppData/Local/Programs/Python/Python*/python.exe"):
+            if p.exists():
+                return str(p)
+    program_files = os.environ.get("ProgramFiles", "C:\\Program Files")
+    for p in Path(program_files).glob("Python*/python.exe"):
         if p.exists():
             return str(p)
     return "python"
+
+def is_python_installed() -> bool:
+    """Verifica se há um executável funcional do Python no sistema."""
+    py = get_python_executable()
+    try:
+        res = subprocess.run([py, "--version"], capture_output=True, text=True, timeout=10)
+        return res.returncode == 0
+    except Exception:
+        return False
 
 def is_chromium_installed() -> bool:
     """Verifica se o navegador Chromium do Playwright está presente no sistema."""
@@ -55,8 +76,10 @@ def is_chromium_installed() -> bool:
 
     return False
 
-def check_and_install_packages(on_progress: Optional[Callable[[str], None]] = None) -> bool:
+def check_and_install_packages(on_progress: Optional[Callable[[str], None]] = None, base_dir: Optional[Path] = None) -> bool:
     """Verifica e instala dependências Python do requirements.txt se necessário."""
+    if base_dir:
+        set_base_dir(base_dir)
     try:
         import fastapi
         import uvicorn
@@ -108,11 +131,17 @@ def check_and_install_playwright(on_progress: Optional[Callable[[str], None]] = 
     res = subprocess.run(cmd, capture_output=True, text=True)
     return res.returncode == 0
 
-def create_windows_shortcuts(target_path: Optional[Path] = None, icon_path: Optional[Path] = None) -> bool:
+def create_windows_shortcuts(
+    target_path: Optional[Path] = None,
+    icon_path: Optional[Path] = None,
+    base_dir: Optional[Path] = None
+) -> bool:
     """
     Cria atalhos do Windows no Menu Iniciar (para indexação no Pesquisar do SO)
     e na Área de Trabalho (para inicialização rápida via clique duplo).
     """
+    if base_dir:
+        set_base_dir(base_dir)
     try:
         appdata = os.environ.get("APPDATA")
         userprofile = os.environ.get("USERPROFILE")
@@ -186,8 +215,13 @@ $s2.Save()
         log_msg(f"Aviso ao criar atalhos do Windows: {e}")
         return False
 
-def check_and_setup_environment(on_progress: Optional[Callable[[str], None]] = None) -> bool:
+def check_and_setup_environment(
+    on_progress: Optional[Callable[[str], None]] = None,
+    base_dir: Optional[Path] = None
+) -> bool:
     """Garante existência de .env, pastas de dados e tabelas do banco de dados SQLite."""
+    if base_dir:
+        set_base_dir(base_dir)
     try:
         if on_progress:
             on_progress("Inicializando banco de dados e pastas...")
@@ -210,15 +244,21 @@ def check_and_setup_environment(on_progress: Optional[Callable[[str], None]] = N
         log_msg(f"Erro ao inicializar ambiente: {e}")
         return False
 
-def run_first_time_setup(on_progress: Optional[Callable[[str], None]] = None) -> bool:
+def run_first_time_setup(
+    on_progress: Optional[Callable[[str], None]] = None,
+    base_dir: Optional[Path] = None
+) -> bool:
     """
     Executa a rotina completa de instalação e configuração na primeira abertura.
     Garante que pacotes essenciais e Chromium estejam presentes mesmo se o diretório
     for copiado entre máquinas com o arquivo .bootstrap_completed já existente.
     """
+    if base_dir:
+        set_base_dir(base_dir)
+
     # 1. Verificação rápida de pacotes essenciais (execução instantânea se já instalados)
-    check_and_install_packages(on_progress)
-    check_and_setup_environment(on_progress)
+    check_and_install_packages(on_progress, base_dir=base_dir)
+    check_and_setup_environment(on_progress, base_dir=base_dir)
 
     flag_file = BASE_DIR / "data" / ".bootstrap_completed"
     if flag_file.exists() and is_chromium_installed():
@@ -232,7 +272,7 @@ def run_first_time_setup(on_progress: Optional[Callable[[str], None]] = None) ->
 
     if on_progress:
         on_progress("Criando atalho de inicialização no Menu Iniciar e Área de Trabalho...")
-    create_windows_shortcuts()
+    create_windows_shortcuts(base_dir=base_dir)
 
     try:
         flag_file.parent.mkdir(parents=True, exist_ok=True)
@@ -242,7 +282,7 @@ def run_first_time_setup(on_progress: Optional[Callable[[str], None]] = None) ->
         pass
 
     if on_progress:
-        on_progress("✓ Configuração concluída com sucesso! Iniciando aplicação...")
+        on_progress("[OK] Configuracao concluida com sucesso! Iniciando aplicacao...")
         time.sleep(1.0)
 
     return True

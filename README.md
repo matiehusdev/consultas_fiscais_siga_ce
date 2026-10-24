@@ -50,15 +50,18 @@ Antes de abrir o programa, certifique-se de que a máquina possui:
 
 ### 2. Passo a passo para baixar o Giro Empresarial
 
-Você tem duas formas de baixar:
+#### Download Direto do Instalador (Recomendado)
 
-#### Opção A: Download Direto em Arquivo ZIP (Mais Simples)
-1. Acesse a página do projeto no GitHub: **[consultas_fiscais_siga_ce](https://github.com/matiehusdev/consultas_fiscais_siga_ce)**.
-2. Clique no botão verde **`Code` ▾** (localizado no canto superior direito).
-3. Clique em **`Download ZIP`** (ou baixe diretamente por [este link](https://github.com/matiehusdev/consultas_fiscais_siga_ce/archive/refs/heads/main.zip)).
-4. Após o download, clique com o botão direito no arquivo baixado (`consultas_fiscais_siga_ce-main.zip`) e selecione **"Extrair Tudo..."** para uma pasta do seu computador (por exemplo: `C:\Giro Empresarial` ou em `Documentos`).
+1. Acesse a página de **Releases** do projeto no GitHub:
+   👉 **[Baixar Giro Empresarial](https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases/latest)**
+2. Na seção **Assets**, clique em **`Instalador_Giro_Empresarial.exe`** para baixar.
+3. Após o download, **dê um clique duplo** no arquivo baixado.
+4. O instalador gráfico configura **tudo automaticamente**: copia os arquivos do sistema, instala dependências, configura o navegador Chromium para automação SEFAZ, cria o banco de dados e gera os atalhos na Área de Trabalho e no Menu Iniciar.
 
-#### Opção B: Via Git (Para Desenvolvedores)
+> [!TIP]
+> Esse é um arquivo **único e completo** — não é necessário extrair ZIP, abrir terminal nem executar comandos. Basta baixar, clicar e usar.
+
+#### Via Git (Para Desenvolvedores)
 ```bash
 git clone https://github.com/matiehusdev/consultas_fiscais_siga_ce.git
 cd consultas_fiscais_siga_ce
@@ -66,47 +69,23 @@ cd consultas_fiscais_siga_ce
 
 ---
 
-### 3. O que vem no pacote baixado
-Ao extrair o pacote, você terá:
-- **`Giro Empresarial.exe`:** Executável principal para iniciar o sistema com clique duplo.
-- **`installer.py`:** Assistente gráfico de instalação e verificação rápida.
-- **`run.bat` e `install.bat`:** Scripts em lote alternativos para inicialização rápida via prompt.
-- **Estrutura completa da aplicação:** Código-fonte seguro, pastas de dados locais e ícones da marca.
-
----
-
 ## 🛠️ Como Iniciar a Aplicação
 
-### Opção 1: Inicialização Rápida Desktop (Recomendada)
+### Opção 1: Após instalar pelo Instalador (Recomendada)
 
-1. Entre na pasta extraída e dê um **clique duplo** em **`Giro Empresarial.exe`**.
-2. **Na primeira abertura**, o sistema roda o **Auto-Setup** automaticamente:
-   - Instala as bibliotecas necessárias.
-   - Configura o navegador Chromium do Playwright para automação SEFAZ.
-   - Inicializa o banco de dados SQLite local.
-   - **Cria automaticamente o atalho oficial com a logo na Área de Trabalho e no Menu Iniciar**.
-3. O servidor web inicia e o seu **navegador padrão abre sozinho** no endereço:  
-   👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+Após a instalação pelo `Instalador_Giro_Empresarial.exe`, o sistema já está pronto para uso:
+- Pressione a tecla `Windows` no teclado, digite **"Giro Empresarial"** e aperte `Enter`.
+- Ou clique no **atalho na Área de Trabalho** criado automaticamente pelo instalador.
+
+O servidor web inicia e o seu **navegador padrão abre sozinho** no endereço:  
+👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
 > [!TIP]
-> Após a primeira abertura, você nunca mais precisa procurar a pasta: basta pressionar a tecla `Windows` no teclado, digitar **"Giro Empresarial"** e apertar `Enter`, ou clicar no atalho da sua Área de Trabalho!
+> Você nunca precisa procurar a pasta de instalação: o atalho oficial com a logo da marca já estará disponível na Pesquisa do Windows e na Área de Trabalho!
 
 ---
 
-### Opção 2: Instalador Guiado
-
-Para configurar o ambiente do zero via assistente:
-
-```cmd
-python installer.py
-```
-*(Ou execute `Instalador_Giro_Empresarial.exe`)*
-
-O instalador verificará o ambiente, instalará dependências, configurará o Chromium e gerará os atalhos do sistema com um único clique.
-
----
-
-### Opção 3: Modo Desenvolvedor / Terminal
+### Opção 2: Modo Desenvolvedor / Terminal
 
 Para desenvolvedores que clonaram o código-fonte via Git:
 
