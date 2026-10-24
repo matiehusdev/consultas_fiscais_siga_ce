@@ -50,16 +50,25 @@ Antes de abrir o programa, certifique-se de que a máquina possui:
 
 ### 2. Passo a passo para baixar o Giro Empresarial
 
-#### Download Direto do Instalador (Recomendado)
+#### 📥 Download Direto do Instalador (Recomendado)
 
-1. Acesse a página de **Releases** do projeto no GitHub:
-   👉 **[Baixar Giro Empresarial](https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases/latest)**
-2. Na seção **Assets**, clique em **`Instalador_Giro_Empresarial.exe`** para baixar.
-3. Após o download, **dê um clique duplo** no arquivo baixado.
-4. O instalador gráfico configura **tudo automaticamente**: copia os arquivos do sistema, instala dependências, configura o navegador Chromium para automação SEFAZ, cria o banco de dados e gera os atalhos na Área de Trabalho e no Menu Iniciar.
+Clique no link abaixo para baixar diretamente o instalador oficial executável:
+
+👉 **[Baixar Instalador_Giro_Empresarial.exe (Download Direto)](https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases/latest/download/Instalador_Giro_Empresarial.exe)**
+
+*(Ou visualize todas as versões na [página oficial de Releases no GitHub](https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases)).*
+
+1. Após o download, **dê um clique duplo** no arquivo `Instalador_Giro_Empresarial.exe`.
+2. O instalador gráfico configura **tudo automaticamente em 1 clique**:
+   - Prepara e copia os componentes do sistema.
+   - Instala as dependências necessárias.
+   - Configura o navegador Chromium para automação da SEFAZ-CE.
+   - Inicializa o banco de dados SQLite local.
+   - **Cria automaticamente os atalhos oficiais com a logo na Área de Trabalho e no Menu Iniciar**.
+3. Ao finalizar, o sistema já inicia e abre seu navegador padrão em `http://127.0.0.1:8000`.
 
 > [!TIP]
-> Esse é um arquivo **único e completo** — não é necessário extrair ZIP, abrir terminal nem executar comandos. Basta baixar, clicar e usar.
+> Esse é um arquivo **único e 100% completo** — não é necessário baixar arquivo ZIP, descompactar pastas, abrir o terminal nem digitar nenhum comando. Basta baixar, dar clique duplo e usar.
 
 #### Via Git (Para Desenvolvedores)
 ```bash
