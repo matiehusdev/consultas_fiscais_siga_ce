@@ -7,97 +7,98 @@
     <!-- Header with Action Button -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h2 class="text-2xl font-extrabold text-[#023047] tracking-tight">Cadastro de Empresas & Certificados A1</h2>
-            <p class="text-xs sm:text-sm text-slate-500">Gerencie contribuintes e vincule seus Certificados Digitais A1 para consultas 100% autônomas no SIGA SEFAZ-CE.</p>
+            <span class="inline-block px-3 py-1 bg-[#e7f3ff] text-[#0064e0] text-xs font-bold rounded-full mb-2">Contribuintes Cadastrados</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0a1317] tracking-tight">Cadastro de Empresas & Certificados A1</h2>
+            <p class="text-xs sm:text-sm text-[#4b4c4f] mt-1">Gerencie contribuintes e vincule seus Certificados Digitais A1 para consultas 100% autônomas no SIGA SEFAZ-CE.</p>
         </div>
-        <button onclick="openModal('modal-add-empresa')" class="inline-flex items-center px-4 py-2.5 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] text-sm font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer">
-            <svg class="w-4 h-4 mr-2 text-[#023047]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+        <button onclick="openModal('modal-add-empresa')" class="inline-flex items-center px-5 py-2.5 bg-[#0064e0] hover:bg-[#0457cb] text-white text-sm font-bold rounded-full shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+            <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
             Adicionar Empresa
         </button>
     </div>
 
     <!-- Feedback Message Banner -->
-    <div id="alert-banner" class="hidden p-4 rounded-xl text-sm font-semibold shadow-sm transition-all duration-200"></div>
+    <div id="alert-banner" class="hidden p-4 rounded-2xl text-sm font-semibold shadow-sm transition-all duration-200"></div>
 
     <!-- Search & Filter Controls -->
-    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        <form method="GET" action="/empresas" class="flex-1 w-full flex items-center gap-3">
-            <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+    <div class="bg-white p-4 rounded-3xl border border-[#dee3e9] shadow-[0_1px_4px_rgba(20,22,26,0.04)] flex flex-col md:flex-row items-center justify-between gap-4">
+        <form method="GET" action="/empresas" class="flex-1 w-full flex flex-wrap sm:flex-nowrap items-center gap-3">
+            <div class="relative flex-1 min-w-[200px]">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5d6c7b]">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </span>
-                <input type="text" name="busca" value="{{ termo_busca or '' }}" placeholder="Pesquisar por Razão Social, CNPJ, CGF..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:border-transparent focus:outline-none transition-all">
+                <input type="text" name="busca" value="{{ termo_busca or '' }}" placeholder="Pesquisar por Razão Social, CNPJ, CGF..." class="w-full pl-10 pr-4 py-2 bg-[#f1f4f7] border border-transparent rounded-full text-sm text-[#1c1e21] placeholder-[#5d6c7b] focus:bg-white focus:border-[#0064e0] focus:ring-2 focus:ring-[#0064e0]/20 focus:outline-none transition-all">
             </div>
-            <select name="filtro" onchange="this.form.submit()" class="border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#ffb703] focus:outline-none cursor-pointer">
+            <select name="filtro" onchange="this.form.submit()" class="border border-[#dee3e9] rounded-full px-4 py-2 text-sm bg-white text-[#1c1e21] focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none cursor-pointer">
                 <option value="todas" {% if filtro_status == 'todas' %}selected{% endif %}>Todas as Empresas</option>
                 <option value="ativas" {% if filtro_status == 'ativas' %}selected{% endif %}>Apenas Ativas</option>
                 <option value="inativas" {% if filtro_status == 'inativas' %}selected{% endif %}>Apenas Inativas</option>
             </select>
-            <button type="submit" class="px-4 py-2 bg-[#023047] hover:bg-[#083c56] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors cursor-pointer">
+            <button type="submit" class="px-5 py-2 bg-[#0a1317] hover:bg-[#1c1e21] text-white text-sm font-bold rounded-full shadow-sm transition-colors cursor-pointer">
                 Filtrar
             </button>
             {% if termo_busca or filtro_status != 'todas' %}
-            <a href="/empresas" class="px-3 py-2 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+            <a href="/empresas" class="px-3.5 py-2 text-xs text-[#4b4c4f] hover:text-[#0a1317] border border-[#dee3e9] rounded-full hover:bg-[#f1f4f7] transition cursor-pointer font-semibold">
                 Limpar
             </a>
             {% endif %}
         </form>
 
-        <div class="flex items-center space-x-2 text-xs">
-            <button onclick="selecionarTodasTabela(true)" class="px-3 py-1.5 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg font-semibold transition cursor-pointer">
+        <div class="flex items-center space-x-2 text-xs w-full sm:w-auto justify-end">
+            <button onclick="selecionarTodasTabela(true)" class="px-3.5 py-1.5 text-[#1c1e21] bg-[#f1f4f7] hover:bg-[#e4e6eb] border border-[#dee3e9] rounded-full font-semibold transition cursor-pointer">
                 Selecionar Todas
             </button>
-            <button onclick="selecionarTodasTabela(false)" class="px-3 py-1.5 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg font-semibold transition cursor-pointer">
+            <button onclick="selecionarTodasTabela(false)" class="px-3.5 py-1.5 text-[#1c1e21] bg-[#f1f4f7] hover:bg-[#e4e6eb] border border-[#dee3e9] rounded-full font-semibold transition cursor-pointer">
                 Desmarcar Todas
             </button>
         </div>
     </div>
 
     <!-- Table of Companies -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-3xl border border-[#dee3e9] shadow-[0_1px_4px_rgba(20,22,26,0.04)] overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50/90">
+            <table class="min-w-full divide-y divide-[#dee3e9] text-sm">
+                <thead class="bg-[#f1f4f7]">
                     <tr>
                         <th scope="col" class="px-4 py-3.5 text-left w-10">
-                            <input type="checkbox" id="check-header" onchange="selecionarTodasTabela(this.checked)" class="rounded text-[#023047] focus:ring-[#ffb703] cursor-pointer">
+                            <input type="checkbox" id="check-header" onchange="selecionarTodasTabela(this.checked)" class="rounded text-[#0064e0] focus:ring-[#0064e0] cursor-pointer">
                         </th>
-                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#023047] tracking-tight">Razão Social</th>
-                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#023047] tracking-tight">CNPJ</th>
-                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#023047] tracking-tight">CNPJ Base</th>
-                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#023047] tracking-tight">CGF</th>
-                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#023047] tracking-tight">Certificado A1</th>
-                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#023047] tracking-tight">Status</th>
-                        <th scope="col" class="px-4 py-3.5 text-right font-bold text-[#023047] tracking-tight">Ações</th>
+                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#0a1317] tracking-tight">Razão Social</th>
+                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#0a1317] tracking-tight">CNPJ</th>
+                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#0a1317] tracking-tight">CNPJ Base</th>
+                        <th scope="col" class="px-4 py-3.5 text-left font-bold text-[#0a1317] tracking-tight">CGF</th>
+                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#0a1317] tracking-tight">Certificado A1</th>
+                        <th scope="col" class="px-4 py-3.5 text-center font-bold text-[#0a1317] tracking-tight">Status</th>
+                        <th scope="col" class="px-4 py-3.5 text-right font-bold text-[#0a1317] tracking-tight">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 divide-solid bg-white">
+                <tbody class="divide-y divide-[#dee3e9] bg-white">
                     {% if empresas %}
                         {% for emp in empresas %}
-                        <tr class="hover:bg-slate-50/80 transition-colors duration-150" id="row-empresa-{{ emp.id }}">
+                        <tr class="hover:bg-[#f8f9fa] transition-colors duration-150" id="row-empresa-{{ emp.id }}">
                             <td class="px-4 py-3.5">
-                                <input type="checkbox" value="{{ emp.id }}" class="empresa-check rounded text-[#023047] focus:ring-[#ffb703] cursor-pointer">
+                                <input type="checkbox" value="{{ emp.id }}" class="empresa-check rounded text-[#0064e0] focus:ring-[#0064e0] cursor-pointer">
                             </td>
-                            <td class="px-4 py-3.5 font-bold text-slate-900">
+                            <td class="px-4 py-3.5 font-bold text-[#0a1317]">
                                 {{ emp.razao_social }}
                             </td>
-                            <td class="px-4 py-3.5 font-mono text-xs text-slate-700">
+                            <td class="px-4 py-3.5 font-mono text-xs text-[#4b4c4f]">
                                 {{ emp.cnpj[:2] }}.{{ emp.cnpj[2:5] }}.{{ emp.cnpj[5:8] }}/{{ emp.cnpj[8:12] }}-{{ emp.cnpj[12:14] }}
                             </td>
-                            <td class="px-4 py-3.5 font-mono text-xs text-slate-500">
+                            <td class="px-4 py-3.5 font-mono text-xs text-[#5d6c7b]">
                                 {{ emp.cnpj_base }}
                             </td>
-                            <td class="px-4 py-3.5 text-xs text-slate-600 font-mono">
+                            <td class="px-4 py-3.5 text-xs text-[#4b4c4f] font-mono">
                                 {{ emp.cgf or "—" }}
                             </td>
                             <td class="px-4 py-3.5 text-center">
                                 {% if emp.certificado_caminho %}
-                                    <button onclick="abrirModalCertificado({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', true, '{{ emp.certificado_nome }}', '{{ emp.certificado_validade.strftime('%d/%m/%Y') if emp.certificado_validade else '' }}', '{{ (emp.certificado_cn or '') | escape }}')" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#219ebc]/15 text-[#023047] border border-[#219ebc]/30 hover:bg-[#219ebc]/25 transition cursor-pointer" title="{{ emp.certificado_cn or '' }}">
-                                        <svg class="w-3.5 h-3.5 mr-1 text-[#219ebc]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2 1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    <button onclick="abrirModalCertificado({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', true, '{{ emp.certificado_nome }}', '{{ emp.certificado_validade.strftime('%d/%m/%Y') if emp.certificado_validade else '' }}', '{{ (emp.certificado_cn or '') | escape }}')" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#e7f3ff] text-[#0064e0] border border-[#0064e0]/20 hover:bg-[#d8ecff] transition cursor-pointer" title="{{ emp.certificado_cn or '' }}">
+                                        <svg class="w-3.5 h-3.5 mr-1 text-[#0064e0]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2 1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                         Autônomo (A1)
                                     </button>
                                 {% else %}
-                                    <button onclick="abrirModalCertificado({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', false, '', '', '')" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition cursor-pointer">
+                                    <button onclick="abrirModalCertificado({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', false, '', '', '')" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#f1f4f7] text-[#4b4c4f] hover:bg-[#e4e6eb] border border-[#dee3e9] transition cursor-pointer">
                                         + Anexar A1
                                     </button>
                                 {% endif %}
@@ -105,25 +106,25 @@
                             <td class="px-4 py-3.5 text-center">
                                 <button onclick="toggleStatus({{ emp.id }})" title="Clique para alternar status" class="cursor-pointer">
                                     {% if emp.ativa %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#e7f8ed] text-[#31a24c] border border-[#31a24c]/20 hover:bg-[#d2f3dd] transition">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#31a24c] mr-1.5"></span>
                                         Ativa
                                     </span>
                                     {% else %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#f1f4f7] text-[#5d6c7b] border border-[#dee3e9] hover:bg-[#e4e6eb] transition">
                                         Inativa
                                     </span>
                                     {% endif %}
                                 </button>
                             </td>
                             <td class="px-4 py-3.5 text-right space-x-2">
-                                <button onclick="abrirModalCertificado({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', {{ 'true' if emp.certificado_caminho else 'false' }}, '{{ emp.certificado_nome or '' }}', '{{ emp.certificado_validade.strftime('%d/%m/%Y') if emp.certificado_validade else '' }}', '{{ (emp.certificado_cn or '') | escape }}')" class="text-xs text-[#219ebc] hover:text-[#023047] font-bold cursor-pointer transition-colors" title="Gerenciar Certificado A1">
+                                <button onclick="abrirModalCertificado({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', {{ 'true' if emp.certificado_caminho else 'false' }}, '{{ emp.certificado_nome or '' }}', '{{ emp.certificado_validade.strftime('%d/%m/%Y') if emp.certificado_validade else '' }}', '{{ (emp.certificado_cn or '') | escape }}')" class="text-xs text-[#0064e0] hover:text-[#0457cb] font-bold cursor-pointer transition-colors" title="Gerenciar Certificado A1">
                                     Certificado
                                 </button>
-                                <button onclick="editarEmpresa({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', '{{ emp.cgf or '' }}', '{{ (emp.observacao or '') | escape }}', {{ 'true' if emp.ativa else 'false' }})" class="text-xs text-slate-600 hover:text-slate-900 font-semibold cursor-pointer transition-colors">
+                                <button onclick="editarEmpresa({{ emp.id }}, '{{ emp.razao_social | escape }}', '{{ emp.cnpj }}', '{{ emp.cgf or '' }}', '{{ (emp.observacao or '') | escape }}', {{ 'true' if emp.ativa else 'false' }})" class="text-xs text-[#4b4c4f] hover:text-[#0a1317] font-semibold cursor-pointer transition-colors">
                                     Editar
                                 </button>
-                                <button onclick="confirmarExclusao({{ emp.id }}, '{{ emp.razao_social | escape }}')" class="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer transition-colors">
+                                <button onclick="confirmarExclusao({{ emp.id }}, '{{ emp.razao_social | escape }}')" class="text-xs text-[#e41e3f] hover:text-[#c01532] font-semibold cursor-pointer transition-colors">
                                     Excluir
                                 </button>
                             </td>
@@ -131,7 +132,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="8" class="px-4 py-12 text-center text-slate-400 text-sm">
+                            <td colspan="8" class="px-4 py-12 text-center text-[#5d6c7b] text-sm">
                                 Nenhuma empresa encontrada. Clique em "Adicionar Empresa" para começar.
                             </td>
                         </tr>
@@ -143,55 +144,55 @@
 </div>
 
 <!-- MODAL GERENCIAR CERTIFICADO DIGITAL A1 -->
-<div id="modal-cert-empresa" class="hidden fixed inset-0 z-50 bg-[#023047]/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+<div id="modal-cert-empresa" class="hidden fixed inset-0 z-50 bg-[#0a1317]/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-[0_12px_40px_rgba(20,22,26,0.16)] border border-[#dee3e9] space-y-5">
+        <div class="flex justify-between items-start pb-3 border-b border-[#dee3e9]">
             <div>
-                <span class="inline-block px-2.5 py-0.5 bg-[#219ebc]/15 text-[#023047] text-[10px] font-bold rounded-full uppercase tracking-wider mb-1">
+                <span class="inline-block px-2.5 py-0.5 bg-[#e7f3ff] text-[#0064e0] text-[10px] font-bold rounded-full uppercase tracking-wider mb-1.5">
                     Consulta Autônoma sem Interação
                 </span>
-                <h3 class="text-lg font-bold text-[#023047]">Certificado Digital A1</h3>
-                <p id="cert-empresa-sub" class="text-xs text-slate-500"></p>
+                <h3 class="text-xl font-extrabold text-[#0a1317]">Certificado Digital A1</h3>
+                <p id="cert-empresa-sub" class="text-xs text-[#4b4c4f] mt-0.5"></p>
             </div>
-            <button onclick="closeModal('modal-cert-empresa')" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
+            <button onclick="closeModal('modal-cert-empresa')" class="text-[#5d6c7b] hover:text-[#0a1317] p-1.5 rounded-full hover:bg-[#f1f4f7] transition cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
         <!-- Seção de Certificado Já Anexado -->
-        <div id="cert-status-anexado" class="hidden p-4 rounded-xl bg-blue-50/80 border border-blue-200 text-xs text-slate-800 space-y-2">
+        <div id="cert-status-anexado" class="hidden p-4 rounded-2xl bg-[#f1f4f7] border border-[#dee3e9] text-xs text-[#1c1e21] space-y-2">
             <div class="flex items-center justify-between">
-                <span class="font-bold flex items-center text-[#023047] text-sm">
-                    <svg class="w-4 h-4 mr-1.5 text-[#219ebc]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2 1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <span class="font-bold flex items-center text-[#0a1317] text-sm">
+                    <svg class="w-4 h-4 mr-1.5 text-[#0064e0]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2 1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                     Certificado A1 Vinculado
                 </span>
-                <button type="button" onclick="removerCertificado()" class="text-rose-600 hover:text-rose-800 font-bold underline cursor-pointer">
+                <button type="button" onclick="removerCertificado()" class="text-[#e41e3f] hover:text-[#c01532] font-bold text-xs underline cursor-pointer">
                     Remover
                 </button>
             </div>
-            <p><strong>Arquivo:</strong> <span id="cert-info-arquivo" class="font-mono"></span></p>
-            <p><strong>Validade:</strong> <span id="cert-info-validade" class="font-semibold text-emerald-700"></span></p>
-            <p><strong>Titular (CN):</strong> <span id="cert-info-cn" class="font-mono text-[11px]"></span></p>
+            <p><strong>Arquivo:</strong> <span id="cert-info-arquivo" class="font-mono text-[#0064e0]"></span></p>
+            <p><strong>Validade:</strong> <span id="cert-info-validade" class="font-semibold text-[#31a24c]"></span></p>
+            <p><strong>Titular (CN):</strong> <span id="cert-info-cn" class="font-mono text-[11px] text-[#4b4c4f]"></span></p>
         </div>
 
         <!-- Formulário para Upload / Substituição -->
         <form id="form-upload-cert" onsubmit="salvarCertificado(event)" class="space-y-4 pt-1">
             <input type="hidden" id="cert-empresa-id">
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Arquivo do Certificado A1 (.pfx ou .p12) *</label>
-                <input type="file" id="cert-file" accept=".pfx,.p12" required class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#023047] file:text-[#ffb703] hover:file:bg-[#083c56] cursor-pointer">
-                <p class="text-[11px] text-slate-500 mt-1">O arquivo é salvo de forma isolada na pasta segura da empresa.</p>
+                <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Arquivo do Certificado A1 (.pfx ou .p12) *</label>
+                <input type="file" id="cert-file" accept=".pfx,.p12" required class="w-full px-3 py-2 border border-[#ced0d4] rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#0064e0] file:text-white hover:file:bg-[#0457cb] cursor-pointer">
+                <p class="text-[11px] text-[#5d6c7b] mt-1.5">O arquivo é salvo de forma isolada na pasta segura da empresa.</p>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Senha do Certificado Digital *</label>
-                <input type="password" id="cert-senha" required class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:outline-none" placeholder="Digite a senha do arquivo .pfx">
-                <p class="text-[11px] text-slate-500 mt-1">A senha é cifrada com AES-128 em repouso e usada apenas em memória no handshake TLS.</p>
+                <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Senha do Certificado Digital *</label>
+                <input type="password" id="cert-senha" required class="w-full px-3.5 py-2.5 border border-[#ced0d4] rounded-xl text-sm focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition" placeholder="Digite a senha do arquivo .pfx">
+                <p class="text-[11px] text-[#5d6c7b] mt-1.5">A senha é cifrada com AES-128 em repouso e usada apenas em memória no handshake TLS.</p>
             </div>
-            <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modal-cert-empresa')" class="px-4 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+            <div class="flex justify-end space-x-2 pt-3 border-t border-[#dee3e9]">
+                <button type="button" onclick="closeModal('modal-cert-empresa')" class="px-5 py-2.5 border border-[#dee3e9] rounded-full text-sm font-semibold text-[#4b4c4f] hover:bg-[#f1f4f7] transition cursor-pointer">
                     Fechar
                 </button>
-                <button type="submit" id="btn-salvar-cert" class="px-5 py-2 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] rounded-xl text-sm font-extrabold shadow-sm transition cursor-pointer">
+                <button type="submit" id="btn-salvar-cert" class="px-6 py-2.5 bg-[#0064e0] hover:bg-[#0457cb] text-white rounded-full text-sm font-bold shadow-sm transition cursor-pointer">
                     Vincular Certificado A1
                 </button>
             </div>
@@ -200,42 +201,47 @@
 </div>
 
 <!-- MODAL CADASTRAR EMPRESA -->
-<div id="modal-add-empresa" class="hidden fixed inset-0 z-50 bg-[#023047]/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-        <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-            <h3 class="text-lg font-bold text-[#023047]">Nova Empresa</h3>
-            <button onclick="closeModal('modal-add-empresa')" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
+<div id="modal-add-empresa" class="hidden fixed inset-0 z-50 bg-[#0a1317]/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-[0_12px_40px_rgba(20,22,26,0.16)] border border-[#dee3e9]">
+        <div class="flex justify-between items-center pb-3 border-b border-[#dee3e9] mb-4">
+            <div>
+                <span class="inline-block px-2.5 py-0.5 bg-[#e7f3ff] text-[#0064e0] text-[10px] font-bold rounded-full uppercase tracking-wider mb-1">
+                    Novo Cadastro
+                </span>
+                <h3 class="text-xl font-extrabold text-[#0a1317]">Cadastrar Empresa</h3>
+            </div>
+            <button onclick="closeModal('modal-add-empresa')" class="text-[#5d6c7b] hover:text-[#0a1317] p-1.5 rounded-full hover:bg-[#f1f4f7] transition cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
         <form id="form-add-empresa" onsubmit="salvarNovaEmpresa(event)" class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Razão Social *</label>
-                <input type="text" id="add-razao" required class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:outline-none" placeholder="Ex: Comercial Fortaleza Ltda">
+                <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Razão Social *</label>
+                <input type="text" id="add-razao" required class="w-full px-3.5 py-2.5 border border-[#ced0d4] rounded-xl text-sm focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition" placeholder="Ex: Comercial Fortaleza Ltda">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">CNPJ (14 dígitos) *</label>
-                    <input type="text" id="add-cnpj" required maxlength="18" oninput="aplicarMascaraCNPJ(this)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-[#ffb703] focus:outline-none" placeholder="00.000.000/0000-00">
+                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">CNPJ (14 dígitos) *</label>
+                    <input type="text" id="add-cnpj" required maxlength="18" oninput="aplicarMascaraCNPJ(this)" class="w-full px-3.5 py-2.5 border border-[#ced0d4] rounded-xl text-sm font-mono focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition" placeholder="00.000.000/0000-00">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">CGF (SEFAZ-CE)</label>
-                    <input type="text" id="add-cgf" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:outline-none" placeholder="Ex: 06.123.456-7">
+                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">CGF (SEFAZ-CE)</label>
+                    <input type="text" id="add-cgf" class="w-full px-3.5 py-2.5 border border-[#ced0d4] rounded-xl text-sm focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition" placeholder="Ex: 06.123.456-7">
                 </div>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Observações</label>
-                <textarea id="add-obs" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:outline-none" placeholder="Notas sobre filial, atividade ou procurações..."></textarea>
+                <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Observações</label>
+                <textarea id="add-obs" rows="2" class="w-full px-3.5 py-2 border border-[#ced0d4] rounded-xl text-sm focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition" placeholder="Notas sobre filial, atividade ou procurações..."></textarea>
             </div>
             <div class="flex items-center space-x-2 pt-1">
-                <input type="checkbox" id="add-ativa" checked class="rounded text-[#023047] focus:ring-[#ffb703] cursor-pointer">
-                <label for="add-ativa" class="text-xs font-medium text-slate-700 cursor-pointer">Empresa ativa para consultas</label>
+                <input type="checkbox" id="add-ativa" checked class="rounded text-[#0064e0] focus:ring-[#0064e0] cursor-pointer">
+                <label for="add-ativa" class="text-xs font-medium text-[#1c1e21] cursor-pointer">Empresa ativa para consultas</label>
             </div>
-            <div class="flex justify-end space-x-2 pt-4 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modal-add-empresa')" class="px-4 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+            <div class="flex justify-end space-x-2 pt-4 border-t border-[#dee3e9]">
+                <button type="button" onclick="closeModal('modal-add-empresa')" class="px-5 py-2.5 border border-[#dee3e9] rounded-full text-sm font-semibold text-[#4b4c4f] hover:bg-[#f1f4f7] transition cursor-pointer">
                     Cancelar
                 </button>
-                <button type="submit" class="px-5 py-2 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] rounded-xl text-sm font-extrabold shadow-sm transition cursor-pointer">
+                <button type="submit" class="px-6 py-2.5 bg-[#0064e0] hover:bg-[#0457cb] text-white rounded-full text-sm font-bold shadow-sm transition cursor-pointer">
                     Salvar Empresa
                 </button>
             </div>
@@ -244,43 +250,48 @@
 </div>
 
 <!-- MODAL EDITAR EMPRESA -->
-<div id="modal-edit-empresa" class="hidden fixed inset-0 z-50 bg-[#023047]/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-        <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-            <h3 class="text-lg font-bold text-[#023047]">Editar Empresa</h3>
-            <button onclick="closeModal('modal-edit-empresa')" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
+<div id="modal-edit-empresa" class="hidden fixed inset-0 z-50 bg-[#0a1317]/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-[0_12px_40px_rgba(20,22,26,0.16)] border border-[#dee3e9]">
+        <div class="flex justify-between items-center pb-3 border-b border-[#dee3e9] mb-4">
+            <div>
+                <span class="inline-block px-2.5 py-0.5 bg-[#e7f3ff] text-[#0064e0] text-[10px] font-bold rounded-full uppercase tracking-wider mb-1">
+                    Atualização
+                </span>
+                <h3 class="text-xl font-extrabold text-[#0a1317]">Editar Empresa</h3>
+            </div>
+            <button onclick="closeModal('modal-edit-empresa')" class="text-[#5d6c7b] hover:text-[#0a1317] p-1.5 rounded-full hover:bg-[#f1f4f7] transition cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
         <form id="form-edit-empresa" onsubmit="salvarEdicaoEmpresa(event)" class="space-y-4">
             <input type="hidden" id="edit-id">
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Razão Social *</label>
-                <input type="text" id="edit-razao" required class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:outline-none">
+                <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Razão Social *</label>
+                <input type="text" id="edit-razao" required class="w-full px-3.5 py-2.5 border border-[#ced0d4] rounded-xl text-sm focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">CNPJ (14 dígitos) *</label>
-                    <input type="text" id="edit-cnpj" required maxlength="18" oninput="aplicarMascaraCNPJ(this)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-[#ffb703] focus:outline-none">
+                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">CNPJ (14 dígitos) *</label>
+                    <input type="text" id="edit-cnpj" required maxlength="18" oninput="aplicarMascaraCNPJ(this)" class="w-full px-3.5 py-2.5 border border-[#ced0d4] rounded-xl text-sm font-mono focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">CGF (SEFAZ-CE)</label>
-                    <input type="text" id="edit-cgf" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:outline-none">
+                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">CGF (SEFAZ-CE)</label>
+                    <input type="text" id="edit-cgf" class="w-full px-3.5 py-2.5 border border-[#ced0d4] rounded-xl text-sm focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition">
                 </div>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Observações</label>
-                <textarea id="edit-obs" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#ffb703] focus:outline-none"></textarea>
+                <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Observações</label>
+                <textarea id="edit-obs" rows="2" class="w-full px-3.5 py-2 border border-[#ced0d4] rounded-xl text-sm focus:ring-2 focus:ring-[#0064e0]/20 focus:border-[#0064e0] focus:outline-none transition"></textarea>
             </div>
             <div class="flex items-center space-x-2 pt-1">
-                <input type="checkbox" id="edit-ativa" class="rounded text-[#023047] focus:ring-[#ffb703] cursor-pointer">
-                <label for="edit-ativa" class="text-xs font-medium text-slate-700 cursor-pointer">Empresa ativa para consultas</label>
+                <input type="checkbox" id="edit-ativa" class="rounded text-[#0064e0] focus:ring-[#0064e0] cursor-pointer">
+                <label for="edit-ativa" class="text-xs font-medium text-[#1c1e21] cursor-pointer">Empresa ativa para consultas</label>
             </div>
-            <div class="flex justify-end space-x-2 pt-4 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modal-edit-empresa')" class="px-4 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+            <div class="flex justify-end space-x-2 pt-4 border-t border-[#dee3e9]">
+                <button type="button" onclick="closeModal('modal-edit-empresa')" class="px-5 py-2.5 border border-[#dee3e9] rounded-full text-sm font-semibold text-[#4b4c4f] hover:bg-[#f1f4f7] transition cursor-pointer">
                     Cancelar
                 </button>
-                <button type="submit" class="px-5 py-2 bg-[#ffb703] hover:bg-[#fb8500] text-[#023047] rounded-xl text-sm font-extrabold shadow-sm transition cursor-pointer">
+                <button type="submit" class="px-6 py-2.5 bg-[#0064e0] hover:bg-[#0457cb] text-white rounded-full text-sm font-bold shadow-sm transition cursor-pointer">
                     Atualizar Dados
                 </button>
             </div>
