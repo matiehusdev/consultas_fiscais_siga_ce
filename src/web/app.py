@@ -644,6 +644,19 @@ def api_test_auth_cancel():
         return {"message": "Operação cancelada."}
     return {"message": "Nenhuma sessão ativa para cancelar."}
 
+@app.post("/api/config/open-folder")
+def api_open_reports_folder():
+    """Abre a pasta local de consultas/relatórios no Explorador de Arquivos do Windows."""
+    folder = settings.consultas_dir
+    folder.mkdir(parents=True, exist_ok=True)
+    if sys.platform == "win32":
+        import os
+        os.startfile(str(folder))
+    else:
+        import subprocess
+        subprocess.run(["xdg-open", str(folder)])
+    return {"message": "Pasta de relatórios aberta com sucesso.", "path": str(folder)}
+
 @app.get("/api/status/live")
 def api_get_status_live():
     """Retorna estado e histórico recente da execução para polling do frontend."""

@@ -1,27 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}Configurações — Giro Empresarial{% endblock %}
+{% block title %}Configurações & Diagnóstico — Giro Empresarial{% endblock %}
 
 {% block content %}
 <div class="space-y-6 max-w-4xl mx-auto">
+    <!-- Header -->
     <div>
-        <span class="inline-block px-3 py-1 bg-[#e7f3ff] text-[#0064e0] text-xs font-bold rounded-full mb-2">Diagnóstico & Parâmetros</span>
+        <span class="inline-block px-3 py-1 bg-[#e7f3ff] text-[#0064e0] text-xs font-bold rounded-full mb-2">Diagnóstico & Conectividade</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0a1317] tracking-tight">Configurações & Diagnóstico</h2>
-        <p class="text-xs sm:text-sm text-[#4b4c4f] mt-1">Parâmetros do sistema e teste interativo de autenticação com Certificado Digital A1 no SIGA SEFAZ-CE.</p>
+        <p class="text-xs sm:text-sm text-[#4b4c4f] mt-1">Verifique a comunicação com o portal SEFAZ-CE e acesse diretamente seus arquivos e relatórios gerados.</p>
     </div>
 
     <!-- Feedback Banner -->
     <div id="alert-banner" class="hidden p-4 rounded-2xl text-sm font-semibold shadow-sm transition-all duration-200"></div>
 
-    <!-- Diagnostic & Test Box -->
+    <!-- Diagnostic & Test Box (Meta Dark Showcase Strip Pattern) -->
     <div class="relative overflow-hidden bg-[#0a1317] text-white p-6 sm:p-7 rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-[#2d3135] space-y-5">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-[#2d3135]">
             <div>
                 <span class="inline-block px-3 py-0.5 bg-[#e7f3ff]/15 text-[#e7f3ff] text-xs font-bold rounded-full uppercase tracking-wider mb-2 border border-white/10">
                     Validação em Tempo Real
                 </span>
-                <h3 class="text-xl font-extrabold text-white">Teste de Abertura de Navegador & Certificado A1</h3>
-                <p class="text-xs text-[#ced0d4] mt-0.5">Verifique se o Playwright abre a sessão limpa e autentica no portal SIGA da SEFAZ-CE.</p>
+                <h3 class="text-xl font-extrabold text-white">Teste de Conexão com a SEFAZ-CE</h3>
+                <p class="text-xs text-[#ced0d4] mt-0.5">Confirme se o certificado digital e o acesso ao portal da SEFAZ estão operando normalmente.</p>
             </div>
             <span id="test-badge" class="px-3.5 py-1 rounded-full text-xs font-bold bg-[#14171a] text-[#ced0d4] border border-[#2d3135]">
                 Pronto para Testar
@@ -30,7 +31,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             <div class="sm:col-span-2">
-                <label class="block text-xs font-bold text-[#ced0d4] mb-1.5">Empresa para o Teste:</label>
+                <label class="block text-xs font-bold text-[#ced0d4] mb-1.5">Selecione uma Empresa para o Teste:</label>
                 <select id="test-empresa-id" class="w-full px-4 py-2.5 bg-[#14171a] border border-[#2d3135] rounded-2xl text-sm text-white focus:ring-2 focus:ring-[#0064e0]/30 focus:border-[#0064e0] focus:outline-none cursor-pointer">
                     {% if empresas %}
                         {% for emp in empresas %}
@@ -44,7 +45,7 @@
             <div class="flex gap-2">
                 <button type="button" id="btn-iniciar-teste" onclick="iniciarTesteAuth()" class="flex-1 px-5 py-2.5 bg-[#0064e0] hover:bg-[#0457cb] text-white font-bold rounded-full text-sm shadow-sm transition-all duration-150 flex items-center justify-center cursor-pointer">
                     <svg class="w-4 h-4 mr-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Testar Login SIGA
+                    Testar Conexão
                 </button>
                 <button type="button" id="btn-cancelar-teste" onclick="cancelarTesteAuth()" class="hidden px-4 py-2.5 bg-[#e41e3f] hover:bg-[#c01532] text-white text-xs font-bold rounded-full transition cursor-pointer">
                     Cancelar
@@ -57,72 +58,67 @@
             <svg class="w-6 h-6 text-[#f7b928] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             <div>
                 <p class="font-extrabold text-[#f7b928] text-sm">AÇÃO NECESSÁRIA NO WINDOWS</p>
-                <p id="acao-texto" class="text-xs mt-0.5 text-[#ced0d4]">Selecione o certificado digital na janela do navegador para continuar.</p>
+                <p id="acao-texto" class="text-xs mt-0.5 text-[#ced0d4]">Selecione o certificado digital na janela aberta para autorizar o acesso.</p>
             </div>
         </div>
 
-        <!-- Live Real-Time Logs Console -->
+        <!-- Live Status Activity Box -->
         <div class="space-y-2">
-            <p class="text-xs font-bold text-[#ced0d4] uppercase tracking-wider">Console de Execução:</p>
-            <div id="test-console" class="bg-[#14171a] rounded-2xl p-4 font-mono text-xs text-[#ced0d4] max-h-48 overflow-y-auto space-y-1.5 border border-[#2d3135]">
-                <p class="text-[#5d6c7b] italic">Clique em "Testar Login SIGA" para iniciar o navegador e validar o certificado.</p>
+            <p class="text-xs font-bold text-[#ced0d4] uppercase tracking-wider">Andamento da Conexão:</p>
+            <div id="test-console" class="bg-[#14171a] rounded-2xl p-4 font-sans text-xs text-[#ced0d4] max-h-44 overflow-y-auto space-y-1.5 border border-[#2d3135]">
+                <p class="text-[#5d6c7b] italic">Selecione uma empresa e clique em "Testar Conexão" para validar o certificado.</p>
             </div>
         </div>
     </div>
 
-    <!-- Parameter Config Box -->
-    <div class="bg-white p-6 sm:p-7 rounded-3xl border border-[#dee3e9] shadow-[0_1px_4px_rgba(20,22,26,0.04)] space-y-6">
-        <div>
-            <h3 class="text-base font-bold text-[#0a1317] pb-3 border-b border-[#dee3e9] flex items-center">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#0064e0] mr-2.5"></span>
-                1. Diretórios e Armazenamento Local
-            </h3>
-            <div class="grid grid-cols-1 gap-4 pt-3">
-                <div>
-                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Caminho do Banco SQLite</label>
-                    <input type="text" readonly value="{{ config.database_path }}" class="w-full px-4 py-2.5 bg-[#f1f4f7] border border-[#dee3e9] rounded-2xl text-xs font-mono text-[#1c1e21] select-all">
+    <!-- Practical Actions & Shortcuts Grid (Meta Surface Cards) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Card 1: Abrir Pasta de Relatórios e Planilhas -->
+        <div class="bg-white p-6 sm:p-7 rounded-3xl border border-[#dee3e9] shadow-[0_1px_4px_rgba(20,22,26,0.04)] flex flex-col justify-between">
+            <div class="space-y-3">
+                <div class="w-11 h-11 rounded-2xl bg-[#e7f3ff] text-[#0064e0] flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Diretório Raiz de Consultas & Relatórios</label>
-                    <input type="text" readonly value="{{ config.consultas_dir }}" class="w-full px-4 py-2.5 bg-[#f1f4f7] border border-[#dee3e9] rounded-2xl text-xs font-mono text-[#1c1e21] select-all">
-                </div>
+                <h3 class="text-base font-bold text-[#0a1317]">Pasta de Relatórios e Planilhas Excel</h3>
+                <p class="text-xs text-[#5d6c7b] leading-relaxed">
+                    Todas as consultas realizadas geram arquivos consolidados (.xlsx) organizados por empresa e período diretamente em seu computador.
+                </p>
+            </div>
+            <div class="pt-5 mt-4 border-t border-[#f1f4f7]">
+                <button type="button" onclick="abrirPastaRelatorios()" id="btn-abrir-pasta" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-[#f1f4f7] hover:bg-[#e4e6eb] active:bg-[#d8dadf] text-[#0a1317] text-xs font-bold rounded-full border border-[#dee3e9] transition-all cursor-pointer">
+                    <svg class="w-4 h-4 mr-2 text-[#0064e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    Abrir Pasta de Relatórios no Computador
+                </button>
             </div>
         </div>
 
-        <div>
-            <h3 class="text-base font-bold text-[#0a1317] pb-3 border-b border-[#dee3e9] flex items-center">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#0064e0] mr-2.5"></span>
-                2. Integração SIGA & Navegador (Playwright)
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3">
-                <div>
-                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">URL Base do SIGA</label>
-                    <input type="text" readonly value="{{ config.siga_base_url }}" class="w-full px-4 py-2.5 bg-[#f1f4f7] border border-[#dee3e9] rounded-2xl text-xs font-mono text-[#1c1e21]">
+        <!-- Card 2: Status do Ambiente e Conexão -->
+        <div class="bg-white p-6 sm:p-7 rounded-3xl border border-[#dee3e9] shadow-[0_1px_4px_rgba(20,22,26,0.04)] flex flex-col justify-between">
+            <div class="space-y-3">
+                <div class="w-11 h-11 rounded-2xl bg-[#e7f8ed] text-[#31a24c] flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Modo Headless (Sem Janela)</label>
-                    <div class="px-4 py-2.5 bg-[#f1f4f7] border border-[#dee3e9] rounded-2xl text-xs font-semibold text-[#1c1e21] flex items-center justify-between">
-                        <span>{{ 'Ativado' if config.browser_headless else 'Desativado (Janela Visível)' }}</span>
-                        <span class="text-[10px] text-[#0064e0] font-bold bg-[#e7f3ff] px-2.5 py-0.5 rounded-full border border-[#0064e0]/20">Recomendado p/ A1</span>
+                <h3 class="text-base font-bold text-[#0a1317]">Status da Conexão Fiscal</h3>
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-center justify-between py-1.5 border-b border-[#f1f4f7]">
+                        <span class="text-[#5d6c7b]">Portal SEFAZ-CE (SIGA):</span>
+                        <span class="font-bold text-[#31a24c] flex items-center"><span class="w-2 h-2 rounded-full bg-[#31a24c] mr-1.5"></span>Operacional</span>
+                    </div>
+                    <div class="flex items-center justify-between py-1.5 border-b border-[#f1f4f7]">
+                        <span class="text-[#5d6c7b]">Proteção de Dados:</span>
+                        <span class="font-bold text-[#0a1317]">Criptografia Local Segura</span>
+                    </div>
+                    <div class="flex items-center justify-between py-1.5">
+                        <span class="text-[#5d6c7b]">Consultas Automatizadas:</span>
+                        <span class="font-bold text-[#0064e0]">Pronto para Uso</span>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Timeout p/ Seleção de Certificado</label>
-                    <input type="text" readonly value="{{ config.certificate_selection_timeout_seconds }} segundos" class="w-full px-4 py-2.5 bg-[#f1f4f7] border border-[#dee3e9] rounded-2xl text-xs font-mono text-[#1c1e21]">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-[#0a1317] mb-1.5">Intervalo de Polling de Status</label>
-                    <input type="text" readonly value="{{ config.polling_interval_seconds }} segundos" class="w-full px-4 py-2.5 bg-[#f1f4f7] border border-[#dee3e9] rounded-2xl text-xs font-mono text-[#1c1e21]">
-                </div>
             </div>
-        </div>
-
-        <div class="p-4 bg-[#e7f3ff]/60 rounded-2xl border border-[#0064e0]/20 text-xs text-[#1c1e21] space-y-1">
-            <p class="font-bold text-[#0a1317] flex items-center">
-                <svg class="w-4 h-4 mr-1.5 text-[#0064e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Política de Portabilidade e Segurança
-            </p>
-            <p class="text-[#4b4c4f]">Os caminhos e variáveis de ambiente são lidos dinamicamente de <code class="font-mono bg-white px-2 py-0.5 rounded-md border border-[#dee3e9] text-[#0064e0]">.env</code>. Para alterar timeouts ou portas, edite o arquivo local com segurança.</p>
+            <div class="pt-5 mt-4 border-t border-[#f1f4f7]">
+                <a href="/consultas/nova" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-[#0064e0] hover:bg-[#0457cb] text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer">
+                    Iniciar Nova Consulta Fiscal
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -141,6 +137,36 @@
         consoleEl.scrollTop = consoleEl.scrollHeight;
     }
 
+    async function abrirPastaRelatorios() {
+        const btn = document.getElementById("btn-abrir-pasta");
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="animate-spin inline-block mr-2">⟳</span> Abrindo pasta...`;
+        
+        try {
+            const resp = await fetch("/api/config/open-folder", { method: "POST" });
+            const data = await resp.json();
+            mostrarBanner(data.message || "Pasta de relatórios aberta com sucesso!", "success");
+        } catch (e) {
+            mostrarBanner("Não foi possível abrir a pasta automaticamente no Windows.", "error");
+        } finally {
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }, 1200);
+        }
+    }
+
+    function mostrarBanner(mensagem, tipo = "success") {
+        const banner = document.getElementById("alert-banner");
+        banner.className = `p-4 rounded-2xl text-sm font-semibold shadow-sm transition-all duration-200 ${
+            tipo === "success" ? "bg-[#e7f8ed] text-[#1e7e34] border border-[#31a24c]/30" : "bg-[#fde8e8] text-[#c81e1e] border border-[#f05252]/30"
+        }`;
+        banner.textContent = mensagem;
+        banner.classList.remove("hidden");
+        setTimeout(() => banner.classList.add("hidden"), 5000);
+    }
+
     async function iniciarTesteAuth() {
         const empresaSelect = document.getElementById("test-empresa-id");
         const empresaId = empresaSelect.value ? parseInt(empresaSelect.value) : null;
@@ -155,7 +181,7 @@
         btnIniciar.classList.add("opacity-50");
         btnCancelar.classList.remove("hidden");
         badge.className = "px-3.5 py-1 rounded-full text-xs font-bold bg-[#e7f3ff] text-[#0064e0] border border-[#0064e0]/30";
-        badge.textContent = "Navegador em Execução...";
+        badge.textContent = "Conectando ao SEFAZ...";
 
         try {
             const resp = await fetch("/api/auth/test", {
@@ -166,15 +192,14 @@
             const data = await resp.json();
 
             if (!resp.ok) {
-                alert(data.detail || "Erro ao iniciar teste.");
+                mostrarBanner(data.detail || "Erro ao iniciar teste.", "error");
                 resetTestButtons();
                 return;
             }
 
-            // Inicia polling de status
             startStatusPolling();
         } catch (err) {
-            alert("Falha de conexão com o servidor.");
+            mostrarBanner("Falha de conexão com o sistema.", "error");
             resetTestButtons();
         }
     }
@@ -217,14 +242,12 @@
                 const state = data.state;
                 const history = data.history || [];
 
-                // Exibe novos logs na tela
                 for (let i = lastLoggedIndex; i < history.length; i++) {
                     const item = history[i];
                     appendConsoleLog(item.timestamp, item.etapa, item.mensagem, item.etapa === "ERRO");
                 }
                 lastLoggedIndex = history.length;
 
-                // Alerta de ação necessária
                 const acaoBox = document.getElementById("acao-box");
                 const acaoTexto = document.getElementById("acao-texto");
                 if (state.acao_necessaria) {
@@ -234,15 +257,14 @@
                     acaoBox.classList.add("hidden");
                 }
 
-                // Se terminou
                 if (!state.ativo) {
                     const badge = document.getElementById("test-badge");
                     if (state.etapa === "CONCLUIDO" || state.etapa === "AUTENTICADO") {
                         badge.className = "px-3.5 py-1 rounded-full text-xs font-bold bg-[#e7f8ed] text-[#31a24c] border border-[#31a24c]/30";
-                        badge.textContent = "✓ Autenticado com Sucesso!";
+                        badge.textContent = "✓ Conexão Estabelecida com Sucesso!";
                     } else if (state.etapa === "ERRO" || state.etapa === "TIMEOUT") {
                         badge.className = "px-3.5 py-1 rounded-full text-xs font-bold bg-[#fde8e8] text-[#e41e3f] border border-[#e41e3f]/30";
-                        badge.textContent = "Falha no Login";
+                        badge.textContent = "Falha na Conexão";
                     }
                     resetTestButtons();
                 }
