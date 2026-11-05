@@ -1,5 +1,6 @@
 import threading
 import time
+import hashlib
 from datetime import datetime, timezone
 from typing import Optional, List, Tuple, Dict, Any
 from sqlalchemy.orm import Session
@@ -23,7 +24,7 @@ from src.reports.pdf_reporter import PdfReporter
 from src.reports.batch_reporter import BatchReporter, EmpresaResumoLote
 from src.orchestrator.status_broadcaster import status_broadcaster
 from src.utils.cnpj_validator import clean_cnpj, format_cnpj
-from src.utils.date_helpers import matches_month, format_periodo_mes, NOMES_MESES
+from src.utils.date_helpers import matches_month, matches_period, format_periodo_mes, NOMES_MESES
 from src.utils.logger import logger
 from src.config import settings
 
@@ -262,6 +263,20 @@ def _processar_documentos_empresa(
                 caminho_arq = emp_dir / nome_arq
                 if caminho_arq.exists():
                     op_enum = OperationType.SAIDA if operacao == "SAIDA" else OperationType.ENTRADA
+
+                    # Guarda contra colisão de download (arquivo idêntico para saídas e entradas)
+                    if operacao == "ENTRADA":
+                        arq_saida = emp_dir / f"{tipo_doc.lower()}_saida.xlsx"
+                        if arq_saida.exists() and caminho_arq.stat().st_size > 0:
+                            h_saida = hashlib.sha256(arq_saida.read_bytes()).hexdigest()
+                            h_entrada = hashlib.sha256(caminho_arq.read_bytes()).hexdigest()
+                            if h_saida == h_entrada:
+                                logger.warning(
+                                    f"Alerta de Integridade para {razao}: {nome_arq} possui hash idêntico a {arq_saida.name} ({h_saida[:12]}). "
+                                    f"Descartando arquivo duplicado para evitar contaminação de entradas."
+                                )
+                                continue
+
                     if tipo_doc == "NFE":
                         recs = nfe_proc.processar_arquivo(caminho_arq, operacao=op_enum)
                     else:
@@ -273,11 +288,17 @@ def _processar_documentos_empresa(
                             logger.warning(f"Ignorando {nome_arq} pois seu conteúdo é de SAÍDA e nfce_saida.xlsx já existe.")
                             continue
 
-                    # Filtro estrito: seleciona SOMENTE os registros correspondentes ao mês/ano da consulta
+                    # Filtro estrito: seleciona SOMENTE os registros correspondentes ao período solicitado
                     recs_filtrados = [
                         r for r in recs
-                        if matches_month(r.mes, target_year=data_inicio.year, target_month=data_inicio.month)
+                        if matches_period(r.mes, data_inicio, data_fim)
                     ]
+                    tot_aut = sum(r.valor_autorizado for r in recs_filtrados)
+                    logger.info(
+                        f"[{razao}] {nome_arq}: {len(recs)} registro(s) lido(s) -> "
+                        f"{len(recs_filtrados)} no período ({data_inicio} a {data_fim}). "
+                        f"Total Autorizado: R$ {tot_aut:,.2f}"
+                    )
                     records_empresa.extend(recs_filtrados)
 
             status_broadcaster.publish(

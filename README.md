@@ -4,7 +4,24 @@
   <img src="src/web/static/img/logo_giro_empresarial.png" alt="Giro Empresarial" width="380">
 </p>
 
-Sistema automatizado de alta performance e confiabilidade em Python para consultas fiscais em lote, auditoria e consolidação executiva de **NF-e (Nota Fiscal Eletrônica - Modelo 55)** e **NFC-e (Nota Fiscal de Consumidor Eletrônica - Modelo 65)** no portal **SIGA (Sistema de Interface Guiada à Autorregularização)** da SEFAZ-CE.
+<p align="center">
+  <strong>Sistema Desktop Inteligente para Consultas Fiscais em Lote, Auditoria Contábil e Consolidação Executiva na SEFAZ-CE</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases/latest"><img src="https://img.shields.io/badge/Release-v1.3.0-0064e0.svg" alt="Versão v1.3.0"></a>
+  <a href="#-testes-automatizados"><img src="https://img.shields.io/badge/Testes-70%20passed-22c55e.svg" alt="70 Testes Passando"></a>
+  <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/Plataforma-Windows%2010%20%2F%2011-0a1317.svg" alt="Windows 64-bit">
+</p>
+
+---
+
+## 📖 Visão Geral do Projeto
+
+O **Giro Empresarial** é uma solução corporativa desenvolvida para escritórios de contabilidade, consultorias tributárias e departamentos fiscais. O sistema automatiza integralmente a extração, auditoria, conciliação e geração de relatórios de **NF-e (Modelo 55)** e **NFC-e (Modelo 65)** diretamente do portal **SIGA (Sistema de Interface Guiada à Autorregularização)** da **SEFAZ-CE**.
+
+Com uma interface moderna inspirada no *Meta Design System*, o sistema combina execução autônoma via **Certificado Digital A1**, tolerância avançada a falhas da SEFAZ, isolamento estrito de sessões por CNPJ e um **Motor de Integridade Fiscal** com proteção ativa contra download cruzado e race conditions assíncronas.
 
 ---
 
@@ -12,118 +29,163 @@ Sistema automatizado de alta performance e confiabilidade em Python para consult
 
 > [!IMPORTANT]
 > **POLÍTICA DE PRIVACIDADE E CERTIFICADOS LOCAIS:**
-> - **NENHUM certificado digital, arquivo `.pfx`, `.p12`, chave privada ou senha é versionado neste repositório.**
-> - O arquivo `.gitignore` bloqueia estritamente quaisquer chaves, certificados, credenciais locais (`.env`), dados de bancos SQLite locais e relatórios de clientes.
-> - **Cada usuário/máquina deve configurar seus próprios certificados digitais A1 localmente:**
->   - **Vinculação direta via Web (.pfx / .p12):** Você pode anexar o arquivo do Certificado A1 diretamente no cadastro da empresa na tela **Empresas** informando a senha. O sistema valida os dados do titular em tempo de execução, moderniza a criptografia para compatibilidade com o navegador (AES-256) e protege a senha em repouso com chave simétrica local.
->   - **Repositório nativo do Windows:** Alternativamente, o certificado A1 pode ser instalado no repositório de certificados do Windows (`certmgr.msc`) para seleção interativa durante a consulta.
+> - **NENHUM certificado digital, arquivo `.pfx`/`.p12`, chave privada ou senha é versionado neste repositório.**
+> - O arquivo `.gitignore` bloqueia estritamente quaisquer chaves criptográficas, credenciais locais (`.env`), bancos SQLite e relatórios gerados.
+> - **Modos de Operação com Certificado:**
+>   - **Vinculação Direta no Cadastro (.pfx / .p12):** Você pode anexar o arquivo A1 diretamente à empresa na tela **Empresas**. O sistema converte dinamicamente certificados legados (RC2-40/3DES) para criptografia moderna (**AES-256-CBC com PBKDF2/SHA-256** compatível com o Chromium), protege a senha em repouso com chave simétrica local (*Fernet*) e opera de forma 100% autônoma.
+>   - **Certificado de Procurador / Contador:** Um único certificado pode gerenciar múltiplas empresas outorgadas; o robô realiza a seleção e confirmação automática de unidade no SIGA.
+>   - **Repositório do Windows:** Caso prefira não importar o arquivo, o sistema detecta os certificados instalados no repositório nativo (`certmgr.msc`).
 
 ---
 
-## 🚀 Principais Funcionalidades
+## ⚡ Diferenciais & Motor de Integridade Fiscal (v1.3.0)
 
-- **Auto-Setup na Primeira Abertura:** O sistema configura automaticamente dependências, navegador Chromium do Playwright, banco de dados SQLite e atalhos na primeira execução.
-- **Execução via Clique Duplo:** Aplicativo desktop com inicializador executável nativo (`Giro Empresarial.exe`) com ícone oficial da marca.
-- **Atalho no Pesquisar do SO:** Criação automática de atalho no Menu Iniciar (`Start Menu`), permitindo abrir a aplicação pesquisando "Giro Empresarial" no Windows.
-- **Abertura Automática do Navegador:** Ao iniciar o servidor local, o navegador padrão é aberto automaticamente em `http://127.0.0.1:8000`.
-- **Automação SEFAZ-CE Resiliente:** Processamento sequencial com isolamento estrito de unidades/contribuintes, retry automático para instabilidades da SEFAZ e suporte a Certificado Digital A1.
-- **Relatório Executivo Consolidado:** Layout corporativo executivo sintetizado:
-  `# | EMPRESAS | VALOR ENTRADAS | VALOR SAÍDAS`
-  com filtro estrito para o mês/competência escolhido e exportação em **PDF** e **Excel (XLSX)**.
-- **Tolerância a Falhas & Repetir Erros:** Detecção inteligente de erros parciais com opção de repetir processamento apenas para as empresas com falha no lote.
+### 1. Rastreamento Estrito de Solicitações Assíncronas (Anti-Race Condition)
+O portal SIGA opera downloads em fila assíncrona (`/downloads-assincronos`). O robô intercepta as respostas das requisições REST da SEFAZ, correlaciona o identificador único da solicitação (`solicitacao_id`) e aguarda a conclusão **exclusivamente do registro correspondente à operação atual**, impedindo que solicitações anteriores concluídas contaminem a operação seguinte.
+
+### 2. Guarda Contra Colisão de Hash (Operation Segregation)
+Ao processar operações opostas (Saídas vs Entradas) de uma mesma empresa, o sistema compara as assinaturas criptográficas **SHA-256** dos arquivos baixados. Se houver identidade binária entre os arquivos, o sistema rejeita a atribuição espúria, registra alertas de auditoria e garante que o faturamento de Saída nunca seja atribuído à Entrada.
+
+### 3. Normalização e Truncamento Temporal
+Parsers fiscais robustos que extraem a porção de data pura antes de realizar o matching mensal ou de período (`matches_period`), suportando timestamps detalhados (`DD/MM/YYYY HH:MM:SS`), formatos ISO e variações de acentuação sem descarte indevido de notas fiscais.
+
+### 4. Auditoria Fiscal: Faturamento Baseado em Notas Autorizadas
+A apuração contábil baseia-se **estritamente em notas com status AUTORIZADO**. Notas fiscais canceladas e denegadas são segregadas em colunas independentes para conferência de conformidade e auditoria tributária.
 
 ---
 
-## 📥 Como Baixar (Download)
+## 📊 Relatórios Gerados
 
-### 1. O que você precisa ter instalado na máquina
-Antes de abrir o programa, certifique-se de que a máquina possui:
-- **Windows 10 ou 11 (64 bits)**
+O sistema produz automaticamente três níveis de documentação a cada lote consultado:
+
+1. **Relatório Consolidado do Lote (Multi-Empresas):**
+   - Disponível em **Excel (XLSX)** e **PDF Executivo**.
+   - Resumo corporativo direto:
+     ```text
+     # | EMPRESAS | VALOR ENTRADAS | VALOR SAÍDAS
+     ```
+   - Totalizadores gerais e auditoria de notas canceladas por contribuinte.
+2. **Relatório Analítico Individual (Por Empresa):**
+   - Quadros demonstrativos segmentados por abrangência (Operações Internas, Interestaduais e Exterior).
+   - Segregação clara entre NF-e (Modelo 55) e NFC-e (Modelo 65).
+3. **Planilhas Originais da SEFAZ:**
+   - Armazenadas e organizadas por lote e CNPJ na pasta de consultas para fins de compliance fiscal.
+
+---
+
+## 📥 Como Baixar e Instalar
+
+### 1. Pré-requisitos
+- **Windows 10 ou 11 (64 bits)**.
 - **Python 3.11 ou superior**:
   - Baixe no site oficial: [python.org/downloads](https://www.python.org/downloads/)
   - > [!IMPORTANT]
-    > Na primeira tela do instalador do Python, **marque obrigatoriamente a opção:**  
+    > Na primeira tela do instalador do Python, marque obrigatoriamente:  
     > ☑️ **"Add python.exe to PATH"** (Adicionar Python ao PATH).
-- **Certificado Digital A1** da empresa ou do escritório de contabilidade (instalado no Windows ou arquivo `.pfx`).
+- **Certificado Digital A1** (da empresa ou contador).
 
 ---
 
-### 2. Passo a passo para baixar o Giro Empresarial
+### 2. Download do Instalador Oficial
 
-#### 📥 Download Direto do Instalador (Recomendado)
-
-Clique no link abaixo para baixar diretamente o instalador oficial executável:
+Clique no link abaixo para baixar a versão mais recente:
 
 👉 **[Baixar Instalador_Giro_Empresarial.exe (Download Direto)](https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases/latest/download/Instalador_Giro_Empresarial.exe)**
 
-*(Ou visualize todas as versões na [página oficial de Releases no GitHub](https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases)).*
+*(Todas as versões e notas de atualização estão disponíveis na [página de Releases no GitHub](https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases)).*
 
-1. Após o download, **dê um clique duplo** no arquivo `Instalador_Giro_Empresarial.exe`.
-2. O instalador gráfico configura **tudo automaticamente em 1 clique**:
-   - Prepara e copia os componentes do sistema.
-   - Instala as dependências necessárias.
-   - Configura o navegador Chromium para automação da SEFAZ-CE.
+#### Como utilizar o Instalador:
+1. Dê um clique duplo em `Instalador_Giro_Empresarial.exe`.
+2. O instalador configura todo o ecossistema em **1 clique**:
+   - Prepara e copia os componentes do sistema para o seu usuário.
+   - Instala as dependências necessárias de alto desempenho.
+   - Configura o navegador Chromium com suporte a mTLS para SEFAZ-CE.
    - Inicializa o banco de dados SQLite local.
-   - **Cria automaticamente os atalhos oficiais com a logo na Área de Trabalho e no Menu Iniciar**.
+   - **Cria automaticamente os atalhos oficiais na Área de Trabalho e no Menu Iniciar**.
 3. Ao finalizar, o sistema já inicia e abre seu navegador padrão em `http://127.0.0.1:8000`.
 
-> [!TIP]
-> Esse é um arquivo **único e 100% completo** — não é necessário baixar arquivo ZIP, descompactar pastas, abrir o terminal nem digitar nenhum comando. Basta baixar, dar clique duplo e usar.
-
-#### Via Git (Para Desenvolvedores)
-```bash
-git clone https://github.com/matiehusdev/consultas_fiscais_siga_ce.git
-cd consultas_fiscais_siga_ce
-```
-
 ---
 
-## 🛠️ Como Iniciar a Aplicação
+## 🚀 Como Iniciar a Aplicação
 
-### Opção 1: Após instalar pelo Instalador (Recomendada)
+### Após a Instalação (Recomendado)
+- Pressione a tecla `Windows`, digite **"Giro Empresarial"** e pressione `Enter`.
+- Ou clique no **atalho na Área de Trabalho** criado pelo instalador.
 
-Após a instalação pelo `Instalador_Giro_Empresarial.exe`, o sistema já está pronto para uso:
-- Pressione a tecla `Windows` no teclado, digite **"Giro Empresarial"** e aperte `Enter`.
-- Ou clique no **atalho na Área de Trabalho** criado automaticamente pelo instalador.
-
-O servidor web inicia e o seu **navegador padrão abre sozinho** no endereço:  
+O servidor web é inicializado e o navegador padrão abre automaticamente em:  
 👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
-> [!TIP]
-> Você nunca precisa procurar a pasta de instalação: o atalho oficial com a logo da marca já estará disponível na Pesquisa do Windows e na Área de Trabalho!
+---
+
+### Modo Desenvolvedor / Terminal
+
+Para desenvolvedores que desejam executar o código-fonte via Git:
+
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/matiehusdev/consultas_fiscais_siga_ce.git
+cd consultas_fiscais_siga_ce
+
+# 2. Instalação e configuração inicial
+install.bat
+
+# 3. Iniciar o servidor
+run.bat
+# (Ou execute diretamente: python main.py)
+```
 
 ---
 
-### Opção 2: Modo Desenvolvedor / Terminal
+## 🏗️ Arquitetura do Sistema
 
-Para desenvolvedores que clonaram o código-fonte via Git:
-
-#### 1. Clonar o repositório
-```bash
-git clone https://github.com/matiehusdev/consultas_fiscais_siga_ce.git
-cd consultas_fiscais_siga_ce
+```text
+consultas_fiscais_siga_ce/
+├── src/
+│   ├── config.py                 # Configurações globais e diretórios de execução
+│   ├── bootstrap.py              # Auto-setup inicial de ambiente, deps e atalhos
+│   ├── database/                 # Camada de persistência (SQLAlchemy + SQLite WAL)
+│   │   ├── models.py             # Modelos (Empresa, Consulta, Solicitacao, etc.)
+│   │   ├── crud.py               # Operações transacionais e criptografia de senhas
+│   │   └── connection.py         # Gerenciamento de sessões do banco de dados
+│   ├── orchestrator/             # Orquestrador de fila e eventos em tempo real
+│   │   ├── queue_manager.py      # Execução sequencial, retry e guarda SHA-256
+│   │   └── status_broadcaster.py # Publicador SSE de progresso para a UI
+│   ├── processor/                # Parsers fiscais contábeis
+│   │   ├── nfe_processor.py      # Normalizador analítico/sintético de NF-e (Mod 55)
+│   │   ├── nfce_processor.py     # Processador e auto-detecção de NFC-e (Mod 65)
+│   │   └── aggregator.py         # Consolidador contábil e auditor de notas
+│   ├── reports/                  # Mecanismo de exportação de relatórios
+│   │   ├── batch_reporter.py     # Relatório consolidado executivo do lote
+│   │   ├── excel_reporter.py     # Relatório individual formatado em XLSX
+│   │   └── pdf_reporter.py       # Relatório executivo institucional em PDF
+│   ├── siga/                     # Integração com o portal SIGA SEFAZ-CE
+│   │   ├── browser_session.py    # Contexto Playwright isolado com TLS multi-origem
+│   │   ├── authentication.py     # Fluxo SSO mTLS e autenticação A1
+│   │   ├── contribuinte_selector # Seletor de unidades e outorgantes
+│   │   ├── ui_downloader.py      # Robô visual para downloads assíncronos
+│   │   ├── nfe_client.py         # Cliente REST / API para NF-e
+│   │   └── nfce_client.py        # Cliente REST / API para NFC-e
+│   ├── utils/                    # Utilitários, criptografia e validação
+│   │   ├── crypto.py             # Criptografia simétrica Fernet de senhas locais
+│   │   ├── cert_parser.py        # Modernizador PKCS#12 e extrator X.509
+│   │   ├── cnpj_validator.py     # Validador e formatador estrito de CNPJ
+│   │   └── date_helpers.py       # Normalizadores temporais e matching de períodos
+│   └── web/                      # Interface Web (FastAPI + Jinja2 + SSE)
+│       ├── app.py                # Rotas da aplicação, dashboards e APIs
+│       ├── templates/            # Telas HTML modernas (Meta Design System)
+│       └── static/               # Folhas de estilo, ícones e assets visuais
+├── tests/                        # Suíte de testes unitários e de integração (70 testes)
+├── installer.py                  # Código-fonte do Instalador Gráfico em 1 clique
+├── launcher.py                   # Inicializador executável desktop
+├── Giro Empresarial.spec         # Especificação de compilação PyInstaller do App
+└── Instalador_Giro_Empresarial.spec # Especificação de compilação do Instalador
 ```
-
-#### 2. Instalação e Configuração Inicial
-Execute o script automatizado:
-```cmd
-install.bat
-```
-*(Ele verifica o Python, instala os pacotes do `requirements.txt` e roda o `src/bootstrap.py` para criar banco, `.env` e atalhos).*
-
-#### 3. Iniciar o servidor
-```cmd
-run.bat
-```
-*(Ou execute: `python main.py`)*
-
-O sistema iniciará o servidor FastAPI/Uvicorn em `http://127.0.0.1:8000` e abrirá o navegador automaticamente.
 
 ---
 
 ## 🧪 Testes Automatizados
 
-O projeto conta com uma suíte de 65 testes automatizados cobrindo autenticação, seleção de contribuintes, validação de CNPJ, processamento de relatórios e endpoints da API:
+O projeto possui uma suíte rigorosa de **70 testes automatizados**, cobrindo validação de CNPJ, criptografia e modernização de certificados A1, isolamento de sessões no navegador, integridade de downloads assíncronos, proteção contra colisão de hash, parsers fiscais e endpoints da API:
 
 ```bash
 pytest
@@ -131,16 +193,7 @@ pytest
 
 ---
 
-## 📚 Documentação Técnica
+## 📄 Licença e Direitos
 
-- [`docs/SETUP.md`](docs/SETUP.md): Guia detalhado de configuração e primeiros passos.
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): Arquitetura das camadas (Siga, Processor, Orchestrator, Web, Reports).
-- [`docs/SIGA_INTEGRATION.md`](docs/SIGA_INTEGRATION.md): Fluxos de navegação e integração com o portal SIGA SEFAZ-CE.
-- [`docs/DATABASE.md`](docs/DATABASE.md): Estrutura do banco de dados SQLite local.
-- [`docs/REPORTS.md`](docs/REPORTS.md): Regras de cálculo e layouts dos relatórios consolidados.
-- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md): Guia de resolução de problemas e mensagens da SEFAZ.
-
----
-
-## 📄 Licença
-Uso interno e restrito — Giro Empresarial. Todos os direitos reservados.
+Projeto desenvolvido para automação fiscal corporativa — **Giro Empresarial**.  
+Todos os direitos reservados.

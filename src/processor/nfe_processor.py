@@ -6,6 +6,7 @@ import pandas as pd
 from openpyxl import load_workbook
 
 from src.processor import DocumentType, OperationType, NormalizedRecord
+from src.utils.date_helpers import clean_date_str
 from src.utils.logger import logger
 
 def _parse_decimal(val) -> Decimal:
@@ -100,8 +101,9 @@ class NFeProcessor:
                 # Tenta identificar o mês/competência
                 mes_val = None
                 for orig_col, norm_col in col_map.items():
-                    if any(k in norm_col for k in ["mês", "mes", "competência", "periodo", "referência", "referencia"]):
-                        mes_val = str(row[orig_col]).strip()
+                    norm_clean = norm_col.replace("\ufffd", "e").replace("?", "e")
+                    if any(k in norm_clean for k in ["mês", "mes", "competência", "periodo", "referência", "referencia"]):
+                        mes_val = clean_date_str(row[orig_col])
                         break
                 if not mes_val or mes_val.lower() in ("total", "nan", "none", ""):
                     mes_val = f"Linha {idx + 1}"
@@ -147,11 +149,13 @@ class NFeProcessor:
                             qtd_deneg = _parse_int(val)
                         elif any(k in norm_col for k in ["val", "valor", "r$"]):
                             val_deneg = _parse_decimal(val)
-                    # Fallback para colunas simples "Valor" / "Quantidade"
+                    # Fallback estrito para colunas simples "Valor" / "Quantidade" (não captura impostos ou canceladas)
                     elif "valor" in norm_col and val_aut == Decimal("0.00") and "emitid" not in norm_col:
-                        val_aut = _parse_decimal(val)
+                        if not any(ign in norm_col for ign in ["icms", "cancelad", "denegad", "imposto", "st", "substitui", "ipi", "frete", "desconto", "seguro"]):
+                            val_aut = _parse_decimal(val)
                     elif ("qtd" in norm_col or "quantidade" in norm_col) and qtd_aut == 0 and "emitid" not in norm_col:
-                        qtd_aut = _parse_int(val)
+                        if not any(ign in norm_col for ign in ["cancelad", "denegad"]):
+                            qtd_aut = _parse_int(val)
 
                 # Se a planilha tiver colunas divididas por região (Interna / Interestadual)
                 # Verifica se há colunas como "Interna (R$)" ou "Interestadual (R$)"

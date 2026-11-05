@@ -6,6 +6,7 @@ import pandas as pd
 from src.processor import DocumentType, OperationType, NormalizedRecord
 from src.processor.nfe_processor import _parse_decimal, _parse_int, _load_dataframe_safely
 from src.utils.cnpj_validator import clean_cnpj
+from src.utils.date_helpers import clean_date_str
 from src.utils.logger import logger
 
 class NFCeProcessor:
@@ -79,7 +80,7 @@ class NFCeProcessor:
                 mes_val = None
                 for orig_col, norm_col in col_map.items():
                     if any(k in norm_col for k in ["data de emissão", "data de emissao", "data emissão", "data emissao", "emissão", "emissao", "mês", "mes", "competência", "competencia", "periodo", "período"]):
-                        val_str = str(row[orig_col]).strip()
+                        val_str = clean_date_str(row[orig_col])
                         if val_str and val_str.lower() not in ("nan", "none", ""):
                             # Se for data completa YYYY-MM-DD ou DD/MM/YYYY, extrai ano-mês
                             if "-" in val_str and len(val_str) >= 7:
@@ -87,7 +88,7 @@ class NFCeProcessor:
                             elif "/" in val_str and len(val_str) >= 7:
                                 partes = val_str.split("/")
                                 if len(partes) == 3:
-                                    mes_val = f"{partes[2]}-{partes[1]}"
+                                    mes_val = f"{partes[2]}-{partes[1].zfill(2)}"
                                 else:
                                     mes_val = val_str
                             else:
