@@ -42,11 +42,17 @@ def test_api_create_empresa_invalid_cnpj(client):
 
 def test_api_pages_render(client):
     # As páginas HTML devem renderizar código 200
-    assert client.get("/").status_code == 200
+    r_home = client.get("/")
+    assert r_home.status_code == 200
+    assert "Versão 1.3.1" in r_home.text
+
     assert client.get("/empresas").status_code == 200
     assert client.get("/consultas/nova").status_code == 200
     assert client.get("/historico").status_code == 200
-    assert client.get("/configuracoes").status_code == 200
+    
+    r_config = client.get("/configuracoes")
+    assert r_config.status_code == 200
+    assert "Versão 1.3.1" in r_config.text
 
 def test_api_create_consulta_triggers_execution(client):
     from unittest.mock import patch

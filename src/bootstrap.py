@@ -275,8 +275,9 @@ def run_first_time_setup(
     create_windows_shortcuts(base_dir=base_dir)
 
     try:
+        from src.config import settings
         flag_file.parent.mkdir(parents=True, exist_ok=True)
-        flag_file.write_text(f"installed_at={time.time()}\nversion=1.0.0\n", encoding="utf-8")
+        flag_file.write_text(f"installed_at={time.time()}\nversion={settings.app_version}\n", encoding="utf-8")
         log_msg("Configuração concluída com êxito! Marcador salvo em data/.bootstrap_completed.")
     except Exception:
         pass

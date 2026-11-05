@@ -27,7 +27,10 @@ def _load_env_file(env_path: Path):
 
 _load_env_file(BASE_DIR / ".env")
 
+APP_VERSION = "1.3.1"
+
 class Settings(BaseModel):
+    app_version: str = Field(default=APP_VERSION)
     app_env: str = Field(default_factory=lambda: os.getenv("APP_ENV", "development"))
     app_host: str = Field(default_factory=lambda: os.getenv("APP_HOST", "127.0.0.1"))
     app_port: int = Field(default_factory=lambda: int(os.getenv("APP_PORT", "8000")))

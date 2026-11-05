@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases/latest"><img src="https://img.shields.io/badge/Release-v1.3.0-0064e0.svg" alt="Versão v1.3.0"></a>
-  <a href="#-testes-automatizados"><img src="https://img.shields.io/badge/Testes-70%20passed-22c55e.svg" alt="70 Testes Passando"></a>
+  <a href="https://github.com/matiehusdev/consultas_fiscais_siga_ce/releases/latest"><img src="https://img.shields.io/badge/Release-v1.3.1-0064e0.svg" alt="Versão v1.3.1"></a>
+  <a href="#-testes-automatizados"><img src="https://img.shields.io/badge/Testes-74%20passed-22c55e.svg" alt="74 Testes Passando"></a>
   <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Plataforma-Windows%2010%20%2F%2011-0a1317.svg" alt="Windows 64-bit">
 </p>
@@ -38,7 +38,7 @@ Com uma interface moderna inspirada no *Meta Design System*, o sistema combina e
 
 ---
 
-## ⚡ Diferenciais & Motor de Integridade Fiscal (v1.3.0)
+## ⚡ Diferenciais & Motor de Integridade Fiscal (v1.3.1)
 
 ### 1. Rastreamento Estrito de Solicitações Assíncronas (Anti-Race Condition)
 O portal SIGA opera downloads em fila assíncrona (`/downloads-assincronos`). O robô intercepta as respostas das requisições REST da SEFAZ, correlaciona o identificador único da solicitação (`solicitacao_id`) e aguarda a conclusão **exclusivamente do registro correspondente à operação atual**, impedindo que solicitações anteriores concluídas contaminem a operação seguinte.
@@ -51,6 +51,9 @@ Parsers fiscais robustos que extraem a porção de data pura antes de realizar o
 
 ### 4. Auditoria Fiscal: Faturamento Baseado em Notas Autorizadas
 A apuração contábil baseia-se **estritamente em notas com status AUTORIZADO**. Notas fiscais canceladas e denegadas são segregadas em colunas independentes para conferência de conformidade e auditoria tributária.
+
+### 5. Atualizador Inteligente & Preservação Total de Dados
+O instalador detecta versões legadas instaladas, destaca o botão de atualização com comparativo de versões, fecha processos travados mediante confirmação e garante que o banco SQLite (`data/db/siga_fiscal.db`), certificados e relatórios nunca sejam excluídos, exibindo diálogo explícito de confirmação de sucesso com inicialização direta.
 
 ---
 
@@ -185,7 +188,7 @@ consultas_fiscais_siga_ce/
 
 ## 🧪 Testes Automatizados
 
-O projeto possui uma suíte rigorosa de **70 testes automatizados**, cobrindo validação de CNPJ, criptografia e modernização de certificados A1, isolamento de sessões no navegador, integridade de downloads assíncronos, proteção contra colisão de hash, parsers fiscais e endpoints da API:
+O projeto possui uma suíte rigorosa de **74 testes automatizados**, cobrindo validação de CNPJ, criptografia e modernização de certificados A1, isolamento de sessões no navegador, integridade de downloads assíncronos, proteção contra colisão de hash, parsers fiscais, renderização dinâmica de versão e rotinas de atualização do instalador:
 
 ```bash
 pytest

@@ -41,6 +41,11 @@ TARGET_DIR = get_target_dir()
 if str(PAYLOAD_DIR) not in sys.path:
     sys.path.insert(0, str(PAYLOAD_DIR))
 
+try:
+    from src.config import APP_VERSION
+except Exception:
+    APP_VERSION = "1.3.1"
+
 from src.bootstrap import (
     set_base_dir,
     get_python_executable,
@@ -51,6 +56,67 @@ from src.bootstrap import (
     create_windows_shortcuts,
     is_chromium_installed
 )
+
+def get_installed_version() -> Optional[str]:
+    """Detecta a versão atualmente instalada em TARGET_DIR."""
+    flag = TARGET_DIR / "data" / ".bootstrap_completed"
+    if flag.exists():
+        try:
+            for line in flag.read_text(encoding="utf-8").splitlines():
+                if line.startswith("version="):
+                    v = line.split("=", 1)[1].strip()
+                    if v:
+                        return v
+        except Exception:
+            pass
+    init_f = TARGET_DIR / "src" / "__init__.py"
+    if init_f.exists():
+        try:
+            for line in init_f.read_text(encoding="utf-8").splitlines():
+                if "__version__" in line and "=" in line:
+                    return line.split("=", 1)[1].strip().strip('"').strip("'")
+        except Exception:
+            pass
+    if (TARGET_DIR / "data").exists() or (TARGET_DIR / "src").exists() or (TARGET_DIR / "Giro Empresarial.exe").exists():
+        return "1.0.0"
+    return None
+
+def is_app_running() -> bool:
+    """Verifica se há processos do Giro Empresarial em execução."""
+    if sys.platform != "win32":
+        return False
+    try:
+        # 1. Verifica processo do executável
+        cmd = ["tasklist", "/FI", "IMAGENAME eq Giro Empresarial.exe", "/FO", "CSV", "/NH"]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=4)
+        if "Giro Empresarial.exe" in res.stdout:
+            return True
+
+        # 2. Verifica se a porta 8000 está ocupada por processo local
+        cmd_port = [
+            "powershell", "-NoProfile", "-Command",
+            "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $conn.OwningProcess }"
+        ]
+        res_port = subprocess.run(cmd_port, capture_output=True, text=True, timeout=4)
+        if res_port.stdout.strip():
+            return True
+    except Exception:
+        pass
+    return False
+
+def close_running_app() -> bool:
+    """Encerra processos do Giro Empresarial para permitir substituição segura de arquivos."""
+    try:
+        subprocess.run(["taskkill", "/F", "/IM", "Giro Empresarial.exe", "/T"], capture_output=True)
+        cmd_kill = [
+            "powershell", "-NoProfile", "-Command",
+            "$p = (Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue).OwningProcess; if ($p) { Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }"
+        ]
+        subprocess.run(cmd_kill, capture_output=True, timeout=5)
+        time.sleep(1.2)
+        return True
+    except Exception:
+        return False
 
 def deploy_payload_files(on_progress: Optional[Callable[[str], None]] = None) -> bool:
     """Extrai e copia todos os arquivos essenciais do payload para a pasta de instalação."""
@@ -134,7 +200,7 @@ def run_full_installation(on_progress: Optional[Callable[[str], None]] = None) -
 
     # Passo 2: Copiar arquivos da aplicação
     if on_progress:
-        on_progress("2/5 Instalando arquivos do Giro Empresarial...")
+        on_progress("2/5 Atualizando arquivos e módulos do Giro Empresarial...")
     deploy_payload_files(on_progress)
 
     # Seta o base_dir do bootstrap para o destino definitivo
@@ -142,7 +208,7 @@ def run_full_installation(on_progress: Optional[Callable[[str], None]] = None) -
 
     # Passo 3: Dependências Python
     if on_progress:
-        on_progress("3/5 Instalando e verificando pacotes necessários...")
+        on_progress("3/5 Verificando pacotes e bibliotecas necessárias...")
     check_and_install_packages(on_progress, base_dir=TARGET_DIR)
 
     # Passo 4: Playwright Chromium
@@ -156,16 +222,16 @@ def run_full_installation(on_progress: Optional[Callable[[str], None]] = None) -
     check_and_setup_environment(on_progress, base_dir=TARGET_DIR)
     create_windows_shortcuts(base_dir=TARGET_DIR)
 
-    # Cria flag de instalação concluída
+    # Cria flag de instalação concluída atualizada
     flag = TARGET_DIR / "data" / ".bootstrap_completed"
     try:
         flag.parent.mkdir(parents=True, exist_ok=True)
-        flag.write_text(f"installed_at={time.time()}\nversion=1.0.0\n", encoding="utf-8")
+        flag.write_text(f"installed_at={time.time()}\nversion={APP_VERSION}\n", encoding="utf-8")
     except Exception:
         pass
 
     if on_progress:
-        on_progress("[OK] Instalacao concluida com sucesso! Giro Empresarial pronto.")
+        on_progress(f"[OK] Concluído com sucesso! Versão v{APP_VERSION} pronta.")
 
     return True
 
@@ -188,8 +254,8 @@ def run_gui():
     from tkinter import ttk, messagebox
 
     root = tk.Tk()
-    root.title("Instalador — Giro Empresarial")
-    root.geometry("520x420")
+    root.title(f"Giro Empresarial — v{APP_VERSION}")
+    root.geometry("540x440")
     root.resizable(False, False)
     root.configure(bg="#023047")
 
@@ -224,9 +290,18 @@ def run_gui():
     )
     lbl_title.pack()
 
+    installed_version = get_installed_version()
+    is_update = installed_version is not None
+
+    sub_title = (
+        f"Atualizador Oficial SEFAZ-CE — Versão v{APP_VERSION}"
+        if is_update
+        else f"Instalação e Configuração Automática SEFAZ-CE — Versão v{APP_VERSION}"
+    )
+
     lbl_sub = tk.Label(
         header_frame,
-        text="Instalação e Configuração Automática SEFAZ-CE",
+        text=sub_title,
         font=("Segoe UI", 10),
         fg="#8ecae6",
         bg="#023047"
@@ -237,15 +312,31 @@ def run_gui():
     card = tk.Frame(root, bg="#ffffff", bd=0, relief="flat")
     card.pack(padx=22, pady=5, fill="both", expand=True)
 
-    is_already_installed = (TARGET_DIR / "data" / ".bootstrap_completed").exists()
-
-    desc_text = (
-        "Este instalador configura o Giro Empresarial de forma 100% autônoma:\n"
-        "• Instala componentes, dependências e automação SEFAZ-CE\n"
-        "• Cria atalho oficial na Área de Trabalho com a logo da marca\n"
-        "• Cria atalho no Menu Iniciar (pesquisável no Windows)\n"
-        f"• Local: {TARGET_DIR}"
-    )
+    if is_update:
+        desc_text = (
+            f"Atualização do Giro Empresarial para a Versão v{APP_VERSION}:\n\n"
+            f"• Versão anterior detectada: v{installed_version}  ➜  Nova versão: v{APP_VERSION}\n"
+            "• Suas empresas cadastradas e histórico serão 100% preservados\n"
+            "• Certificados digitais e relatórios locais permanecem intactos\n"
+            "• Motor fiscal atualizado com integridade SHA-256 e sem corrida de downloads\n"
+            f"• Local: {TARGET_DIR}"
+        )
+        status_initial = f"Pronto para atualizar para a versão v{APP_VERSION}."
+        status_color = "#0064e0"
+        action_btn_text = f"Atualizar para a Versão {APP_VERSION}"
+        action_bg = "#0064e0"
+    else:
+        desc_text = (
+            f"Instalação do Giro Empresarial versão v{APP_VERSION}:\n\n"
+            "• Configura componentes, dependências e automação SEFAZ-CE\n"
+            "• Cria atalho oficial na Área de Trabalho com a logo da marca\n"
+            "• Cria atalho no Menu Iniciar (pesquisável no Windows)\n"
+            f"• Local: {TARGET_DIR}"
+        )
+        status_initial = "Pronto para iniciar a instalação automática."
+        status_color = "#0284c7"
+        action_btn_text = "Instalar e Configurar Agora"
+        action_bg = "#fb8500"
 
     lbl_desc = tk.Label(
         card,
@@ -257,33 +348,57 @@ def run_gui():
     )
     lbl_desc.pack(padx=14, pady=10, anchor="w")
 
-    status_initial = (
-        "O Giro Empresarial já se encontra configurado neste computador."
-        if is_already_installed
-        else "Pronto para iniciar a instalação automática."
-    )
-
     lbl_status = tk.Label(
         card,
         text=status_initial,
-        font=("Segoe UI", 9, "bold" if is_already_installed else "italic"),
-        fg="#059669" if is_already_installed else "#0284c7",
+        font=("Segoe UI", 9, "bold" if is_update else "italic"),
+        fg=status_color,
         bg="#ffffff",
-        wraplength=460,
+        wraplength=480,
         justify="left"
     )
     lbl_status.pack(padx=14, pady=5, anchor="w")
 
-    progress = ttk.Progressbar(card, mode="indeterminate", length=460)
+    progress = ttk.Progressbar(card, mode="indeterminate", length=480)
     progress.pack(padx=14, pady=8)
 
     # Botões de ação
     btn_frame = tk.Frame(root, bg="#023047")
     btn_frame.pack(pady=12, fill="x", padx=22)
 
+    def on_launch():
+        launch_installed_app()
+        root.destroy()
+
     def do_install():
+        # Verifica se há processos do Giro Empresarial em execução
+        if is_app_running():
+            msg = (
+                "O Giro Empresarial está em execução neste computador.\n\n"
+                "Para aplicar as novas atualizações sem conflitos de arquivos, "
+                "o sistema precisa ser encerrado temporariamente.\n\n"
+                "Deseja encerrá-lo agora para continuar a atualização?"
+            )
+            resp = messagebox.askyesno(
+                "Giro Empresarial em Execução",
+                msg,
+                icon="warning"
+            )
+            if resp:
+                lbl_status.config(text="Fechando instâncias do sistema em execução...", fg="#0284c7")
+                root.update_idletasks()
+                close_running_app()
+            else:
+                lbl_status.config(
+                    text="Atualização cancelada. Feche o Giro Empresarial antes de tentar novamente.",
+                    fg="#dc2626"
+                )
+                return
+
         btn_action.config(state="disabled")
         btn_cancel.config(state="disabled")
+        if btn_secondary:
+            btn_secondary.config(state="disabled")
         progress.start(10)
 
         def worker():
@@ -295,43 +410,56 @@ def run_gui():
 
                 def on_done():
                     progress.stop()
-                    lbl_status.config(
-                        text="Instalação concluída com sucesso! Atalhos criados.",
-                        fg="#059669"
-                    )
-                    btn_action.config(
-                        text="Iniciar Giro Empresarial",
-                        state="normal",
-                        bg="#22c55e",
-                        command=on_launch
-                    )
-                    btn_cancel.config(state="normal", text="Fechar")
+                    if is_update:
+                        lbl_status.config(
+                            text=f"Sucesso ao atualizar para a versão v{APP_VERSION}!",
+                            fg="#059669"
+                        )
+                        success_msg = (
+                            "Sucesso ao atualizar!\n\n"
+                            f"O Giro Empresarial foi atualizado com sucesso para a Versão {APP_VERSION}.\n\n"
+                            "✓ Todas as suas empresas cadastradas foram mantidas.\n"
+                            "✓ Seus certificados digitais e relatórios estão preservados.\n\n"
+                            "Clique em OK para iniciar o sistema agora."
+                        )
+                        messagebox.showinfo("Atualização Concluída — Giro Empresarial", success_msg)
+                    else:
+                        lbl_status.config(
+                            text=f"Instalação da versão v{APP_VERSION} concluída com sucesso!",
+                            fg="#059669"
+                        )
+                        success_msg = (
+                            "Instalação concluída com sucesso!\n\n"
+                            f"O Giro Empresarial versão {APP_VERSION} foi instalado e configurado.\n\n"
+                            "✓ Atalhos oficiais criados na Área de Trabalho e no Menu Iniciar.\n\n"
+                            "Clique em OK para iniciar o sistema agora."
+                        )
+                        messagebox.showinfo("Instalação Concluída — Giro Empresarial", success_msg)
+
+                    # Ação imediata: abre o sistema atualizado e fecha o instalador
+                    launch_installed_app()
+                    root.destroy()
 
                 root.after(0, on_done)
 
             except Exception as e:
                 def on_err():
                     progress.stop()
+                    action_title = "Falha na Atualização — Giro Empresarial" if is_update else "Falha na Instalação — Giro Empresarial"
                     lbl_status.config(text=f"Aviso/Erro: {e}", fg="#dc2626")
-                    btn_action.config(state="normal", text="Tentar Novamente", bg="#fb8500")
+                    btn_action.config(state="normal", text="Tentar Novamente", bg="#dc2626")
                     btn_cancel.config(state="normal")
-                    messagebox.showerror("Instalação do Giro Empresarial", str(e))
+                    if btn_secondary:
+                        btn_secondary.config(state="normal")
+                    err_msg = (
+                        "Não foi possível concluir a operação no Giro Empresarial.\n\n"
+                        f"Detalhes do erro:\n{str(e)}\n\n"
+                        "Por favor, feche qualquer janela do programa que possa estar aberta e tente novamente."
+                    )
+                    messagebox.showerror(action_title, err_msg)
                 root.after(0, on_err)
 
         threading.Thread(target=worker, daemon=True).start()
-
-    def on_launch():
-        launch_installed_app()
-        root.destroy()
-
-    if is_already_installed:
-        action_btn_text = "Iniciar Giro Empresarial"
-        action_cmd = on_launch
-        action_bg = "#22c55e"
-    else:
-        action_btn_text = "Instalar e Configurar Agora"
-        action_cmd = do_install
-        action_bg = "#fb8500"
 
     btn_action = tk.Button(
         btn_frame,
@@ -345,24 +473,25 @@ def run_gui():
         padx=14,
         pady=7,
         cursor="hand2",
-        command=action_cmd
+        command=do_install
     )
     btn_action.pack(side="right")
 
-    if is_already_installed:
-        btn_reinstall = tk.Button(
+    btn_secondary = None
+    if is_update:
+        btn_secondary = tk.Button(
             btn_frame,
-            text="Reinstalar / Atualizar",
+            text="Apenas Abrir Sistema",
             font=("Segoe UI", 9),
-            bg="#0284c7",
+            bg="#334155",
             fg="#ffffff",
             relief="flat",
             padx=10,
             pady=7,
             cursor="hand2",
-            command=do_install
+            command=on_launch
         )
-        btn_reinstall.pack(side="right", padx=8)
+        btn_secondary.pack(side="right", padx=8)
 
     btn_cancel = tk.Button(
         btn_frame,
@@ -379,23 +508,35 @@ def run_gui():
     root.mainloop()
 
 def run_cli():
+    installed_v = get_installed_version()
+    is_upd = installed_v is not None
+    mode_str = f"ATUALIZAÇÃO (v{installed_v} -> v{APP_VERSION})" if is_upd else f"INSTALAÇÃO (v{APP_VERSION})"
+
     print("========================================================")
-    print("      INSTALADOR DO GIRO EMPRESARIAL (SEFAZ-CE)")
+    print(f"      GIRO EMPRESARIAL (SEFAZ-CE) — {mode_str}")
     print("========================================================")
     print(f"Diretório de Destino: {TARGET_DIR}")
     print()
+
+    if is_app_running():
+        print("-> Fechando instâncias do sistema em execução...")
+        close_running_app()
+
     try:
         run_full_installation(lambda msg: print(f"-> {msg}"))
         print()
         print("========================================================")
-        print("  [OK] Instalacao concluida com sucesso!")
-        print("  O atalho 'Giro Empresarial' ja esta disponivel")
-        print("  na Pesquisa do Windows e na sua Area de Trabalho.")
+        if is_upd:
+            print(f"  [OK] Sucesso ao atualizar para a versao v{APP_VERSION}!")
+            print("  Suas empresas e configuracoes foram 100% mantidas.")
+        else:
+            print(f"  [OK] Instalacao da versao v{APP_VERSION} concluida com sucesso!")
+        print("  O atalho 'Giro Empresarial' esta disponivel no Windows.")
         print("========================================================")
         if "--launch" in sys.argv:
             launch_installed_app()
     except Exception as e:
-        print(f"\n[ERRO NA INSTALAÇÃO]: {e}")
+        print(f"\n[ERRO]: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

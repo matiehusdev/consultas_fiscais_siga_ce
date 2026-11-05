@@ -35,12 +35,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Giro Empresarial",
     description="Sistema de Gestão e Automação de Consultas Fiscais SEFAZ-CE com Certificado A1",
-    version="1.0.0",
+    version=settings.app_version,
     lifespan=lifespan
 )
 
 # Templates Jinja2
 templates = Jinja2Templates(directory=str(settings.base_dir / "src" / "web" / "templates"))
+templates.env.globals["app_version"] = settings.app_version
 
 # Monta pasta static
 app.mount("/static", StaticFiles(directory=str(settings.base_dir / "src" / "web" / "static")), name="static")
